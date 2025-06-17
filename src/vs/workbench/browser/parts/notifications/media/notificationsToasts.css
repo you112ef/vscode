@@ -68,3 +68,43 @@
 .monaco-workbench > .notifications-toasts .codicon.codicon-info {
 	color: var(--vscode-notificationsInfoIcon-foreground) !important;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench > .notifications-toasts {
+		right: 10px; /* Adjust position from right */
+		left: 10px; /* Add left position to constrain width */
+		width: auto; /* Allow it to shrink based on left/right */
+		max-width: 400px; /* Max width for tablets */
+		/* Adjust bottom if statusbar is also changing height or hidden */
+		/* bottom: 10px; */
+	}
+
+	.monaco-workbench > .notifications-toasts .notification-toast-container > .notification-toast {
+		margin: 4px 0; /* Adjust margin for constrained width */
+	}
+
+	/* Ensure buttons within toasts are tappable - .monaco-button is a common class */
+	.monaco-workbench > .notifications-toasts .notification-toast .monaco-button {
+		min-height: 30px; /* Ensure minimum tappable height */
+		padding: 0 10px; /* Ensure adequate padding */
+	}
+	/* Further refinements for notification toasts on tablets */
+}
+
+@media (max-width: 480px) {
+	.monaco-workbench > .notifications-toasts {
+		right: 5px;
+		left: 5px;
+		bottom: 5px; /* Closer to bottom for phones */
+		max-width: 100%; /* Allow full width if needed, constrained by left/right */
+	}
+
+	.monaco-workbench > .notifications-toasts .notification-toast-container > .notification-toast {
+		/* font-size: 11px; // Optionally reduce font size within toasts */
+	}
+	/* Phone-specific refinements for notification toasts */
+}
+
+/* --- END MOBILE STYLES --- */

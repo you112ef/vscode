@@ -65,3 +65,46 @@
 .monaco-workbench > .notifications-center .codicon.codicon-info {
 	color: var(--vscode-notificationsInfoIcon-foreground) !important;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench > .notifications-center {
+		right: 10px; /* Adjust position */
+		left: 10px; /* Add left position to constrain width */
+		width: auto; /* Allow it to shrink based on left/right */
+		max-width: 420px; /* Max width for notification center on tablets */
+		/* bottom: 10px; // Adjust bottom if statusbar is also changing height or hidden */
+	}
+
+	.monaco-workbench > .notifications-center > .notifications-center-header {
+		padding-left: 6px;
+		padding-right: 3px;
+	}
+
+	.monaco-workbench > .notifications-center .notification-list-item .monaco-button {
+		min-height: 30px; /* Ensure minimum tappable height */
+		padding: 0 10px; /* Ensure adequate padding */
+	}
+	/* Further refinements for notifications center on tablets */
+}
+
+@media (max-width: 480px) {
+	.monaco-workbench > .notifications-center {
+		right: 5px;
+		left: 5px;
+		bottom: 5px; /* Closer to bottom for phones */
+		max-width: 100%; /* Allow full width if needed */
+	}
+
+	.monaco-workbench > .notifications-center > .notifications-center-header {
+		height: 30px; /* Slightly reduce header height */
+	}
+
+	.monaco-workbench > .notifications-center > .notifications-center-header > .notifications-center-header-title {
+		font-size: 10px; /* Smaller title font */
+	}
+	/* Phone-specific refinements for notifications center */
+}
+
+/* --- END MOBILE STYLES --- */

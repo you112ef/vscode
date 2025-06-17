@@ -1,0 +1,41 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch: # Allows manual triggering
+  push:
+    branches:
+      - main # Or your default branch
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Matching Electron 35.x Node version
+
+      - name: Set up Java (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # Or 'zulu', 'adopt'
+          java-version: '17' # Common version for Android builds
+
+      - name: Install dependencies
+        run: npm install # or yarn install if yarn.lock is present
+
+      - name: Build APK with electron-builder
+        run: npx electron-builder --android apk -p never # -p never to prevent publishing
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }} # For code signing (optional, can be omitted for unsigned builds)
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }} # For code signing (optional)
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-oss-dev-apk
+          path: dist_electron/**/*.apk
+          if-no-files-found: error # Fail if no APK is found

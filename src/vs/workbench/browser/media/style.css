@@ -318,3 +318,78 @@ body {
 	outline: 1px dashed var(--vscode-toolbar-hoverOutline);
 	outline-offset: -1px;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench {
+		font-size: 12px; /* Adjusted base font-size for smaller screens */
+	}
+
+	/* Assuming .monaco-workbench or a child like .workbench-body is the main flex container */
+	.monaco-workbench,
+	.monaco-workbench > .workbench-body { /* Apply to .workbench-body if it exists, otherwise .monaco-workbench itself */
+		display: flex;
+		flex-direction: column !important; /* Stack main areas vertically */
+	}
+
+	/* General rule for parts that should take full width on mobile */
+	.monaco-workbench .part.editor { /* Editor should remain visible and take available space */
+		width: 100% !important;
+		flex-basis: auto !important;
+		min-width: 0 !important;
+		order: 2; /* Ensure editor is part of the main flow */
+	}
+
+	.monaco-workbench .part.sidebar,
+	.monaco-workbench .part.panel,
+	.monaco-workbench .part.auxiliarybar {
+		display: none; /* Initially hidden on mobile */
+		width: 100% !important;
+		flex-basis: 100% !important; /* Take full height when visible */
+		min-width: 0 !important;
+		order: 1; /* Default order when visible, can be overridden by mobile-visible */
+		position: absolute; /* Default to absolute positioning when visible */
+		top: 0; /* Adjust based on actual header/titlebar height */
+		left: 0;
+		height: 100%; /* Adjust based on actual header/titlebar height */
+		z-index: 1000; /* High z-index to overlay editor */
+		overflow-y: auto;
+		background-color: var(--vscode-sideBar-background, var(--vscode-editor-background)); /* Ensure background */
+	}
+
+	/* Add a class for when they are toggled open by JS */
+	.monaco-workbench .part.sidebar.mobile-visible,
+	.monaco-workbench .part.panel.mobile-visible,
+	.monaco-workbench .part.auxiliarybar.mobile-visible {
+		display: block !important; /* Or flex, depending on their internal structure */
+		/* position, top, left, height, z-index are defined above for consistency */
+	}
+
+	/* Specific adjustments if sidebar, panel, etc., are direct children of the flex container */
+	/* These are mostly covered by the above rules now */
+
+	/* Hide activity bar or make it very minimal if it takes too much space.
+	   This might be better handled by JS for toggling visibility. */
+	.monaco-workbench .part.activitybar {
+		order: 0; /* Activity bar could be first if it's made to be a narrow strip or toggle */
+		/* display: none; // Example: hide it */
+		/* width: 40px !important; // Example: make it narrower if it stays visible */
+		/* z-index: 1001; // If it needs to be above toggled sidebars */
+	}
+
+	/* Further mobile-specific global styles */
+}
+
+@media (max-width: 480px) {
+	/* Further font size adjustments if needed for very small screens. */
+	/* Phone-specific global overrides */
+	/* Example: potentially hide statusbar or parts of it on very small screens */
+	/*
+	.monaco-workbench .part.statusbar {
+		display: none;
+	}
+	*/
+}
+
+/* --- END MOBILE STYLES --- */

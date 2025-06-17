@@ -240,6 +240,50 @@
 	text-align: center;
 }
 
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench .pane-composite-part > .title .title-label {
+		/* Ensure title label is visible and prominent if needed */
+		display: block !important; /* Override display: none if it was previously hidden */
+		font-weight: bold; /* Example: make it bolder */
+	}
+
+	.monaco-workbench .pane-composite-part > .title.has-composite-bar > .title-actions .monaco-action-bar .action-item {
+		margin-right: 2px; /* Reduce margin for smaller screens */
+		padding: 0 2px; /* Adjust padding for action items */
+	}
+
+	.monaco-workbench .pane-composite-part {
+		width: 100% !important; /* Make sidebars/panels full width */
+		left: 0 !important; /* Ensure it aligns to the left edge */
+		right: 0 !important; /* Ensure it aligns to the right edge */
+		/* display: none; // Potentially hide and make toggleable via JS */
+	}
+
+	.monaco-workbench .pane-composite-part > .title {
+		width: 100% !important; /* Ensure title bar also takes full width */
+		box-sizing: border-box; /* Include padding and border in the element's total width and height */
+	}
+	/* Further refinements for pane composite parts */
+}
+
+@media (max-width: 480px) {
+	/* Phone-specific refinements for pane composite parts */
+	.monaco-workbench .pane-composite-part > .title.has-composite-bar > .title-actions .monaco-action-bar .action-item {
+		margin-right: 1px; /* Further reduce margin for very small screens */
+		padding: 0 1px; /* Further adjust padding for action items */
+	}
+	.monaco-workbench .pane-composite-part > .title.has-composite-bar > .title-actions .monaco-action-bar .action-item .action-label.codicon {
+		font-size: 14px; /* Slightly smaller icons */
+	}
+	.monaco-workbench .pane-composite-part > .title.has-composite-bar > .title-actions .monaco-action-bar .action-item .action-label:not(.codicon) {
+		display: none; /* Hide text labels on phone if they exist next to icons */
+	}
+}
+
+/* --- END MOBILE STYLES --- */
+
 .monaco-workbench .pane-composite-part > .title > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item.icon .badge.compact.compact-content .badge-content,
 .monaco-workbench .pane-composite-part > .header-or-footer > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item.icon .badge.compact.compact-content .badge-content {
 	font-size: 8px;

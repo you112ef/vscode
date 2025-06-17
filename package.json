@@ -233,5 +233,23 @@
   },
   "optionalDependencies": {
     "windows-foreground-love": "0.5.0"
+  },
+  "build": {
+    "appId": "com.example.codeoss",
+    "productName": "Code OSS Dev",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "out/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "android": {
+      "target": [
+        "apk"
+      ]
+    }
   }
 }

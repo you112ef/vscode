@@ -59,6 +59,32 @@
 	height: 35px;
 }
 
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench .part.activitybar {
+		/* Potentially reduce width further or adjust display if it stacks with other full-width elements */
+		/* width: 40px; */
+	}
+
+	.monaco-workbench .activitybar > .content .monaco-action-bar .actions-container {
+		/* Allow actions to wrap if they don't fit */
+		flex-wrap: wrap;
+		overflow-x: auto; /* Allow horizontal scrolling if wrapping is not enough or desired */
+	}
+	/* Further refinements for activity bar */
+}
+
+@media (max-width: 480px) {
+	.monaco-workbench .part.activitybar {
+		/* On very small screens, consider making it even smaller or part of a collapsible menu */
+		/* display: none; // Or handled by JS */
+	}
+	/* Phone-specific refinements for activity bar */
+}
+
+/* --- END MOBILE STYLES --- */
+
 .monaco-workbench .activitybar .menubar.compact .toolbar-toggle-more {
 	width: 100%;
 	height: 35px;

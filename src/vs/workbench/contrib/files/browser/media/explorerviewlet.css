@@ -110,3 +110,49 @@
 .monaco-workbench.context-menu-visible .explorer-folders-view.highlight .monaco-list-row {
 	outline: none !important;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.explorer-folders-view .explorer-item,
+	.explorer-folders-view .editor-group {
+		height: 28px; /* Increase tappable height */
+		line-height: 28px; /* Adjust line height accordingly */
+		/* font-size: 13px; // Ensure font size is readable, adjust if necessary from global styles */
+	}
+
+	.explorer-folders-view .monaco-list-row {
+		padding-left: 2px; /* Adjust padding if needed */
+	}
+
+	.explorer-folders-view .explorer-item .monaco-icon-label {
+		/* Ensure icons are not too small */
+		/* font-size: 18px; // Example: if icons are font based */
+	}
+
+	.explorer-folders-view .explorer-item .actions .monaco-action-bar .action-item {
+		/* Ensure action icons are adequately sized and spaced */
+		/* margin-left: 4px; */
+	}
+	/* Further refinements for explorer view on tablets */
+}
+
+@media (max-width: 480px) {
+	.explorer-folders-view .explorer-item,
+	.explorer-folders-view .editor-group {
+		height: 32px; /* Further increase tappable height for phones */
+		line-height: 32px;
+	}
+
+	.explorer-folders-view .explorer-item .actions .monaco-action-bar .action-item .action-label.codicon {
+		font-size: 16px; /* Ensure icons are not too small */
+		padding: 2px; /* Add some padding around icons */
+	}
+
+	.explorer-folders-view .explorer-item .actions .monaco-action-bar .action-item {
+		margin-left: 2px; /* Reduce space between action items if needed */
+	}
+	/* Phone-specific refinements for explorer view */
+}
+
+/* --- END MOBILE STYLES --- */

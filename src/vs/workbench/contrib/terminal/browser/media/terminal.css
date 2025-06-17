@@ -522,3 +522,53 @@
 .monaco-workbench .xterm.terminal.hide {
 	visibility: hidden;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench .pane-body.integrated-terminal .terminal-outer-container,
+	.monaco-workbench .pane-body.integrated-terminal .terminal-wrapper {
+		/* Ensure terminal uses available space */
+		padding: 2px; /* Slightly reduce padding if any exists that's too large */
+	}
+
+	.monaco-workbench .pane-body.integrated-terminal .tabs-container {
+		/* Ensure tabs are usable */
+	}
+
+	.monaco-workbench .pane-body.integrated-terminal .tabs-list .terminal-tabs-entry {
+		padding-left: 6px; /* Adjust padding for tab items */
+		padding-right: 6px;
+	}
+
+	.monaco-workbench .pane-body.integrated-terminal .tabs-container > .monaco-toolbar {
+		padding: 2px 0; /* Adjust padding for toolbar in tabs */
+	}
+
+	.monaco-workbench .pane-body.integrated-terminal .xterm {
+		/* Ensure terminal viewport itself is well-behaved */
+		/* padding-left will be managed by xterm-scrollable-element, avoid overriding here unless necessary */
+	}
+	/* Further refinements for terminal on tablets */
+}
+
+@media (max-width: 480px) {
+	/* .monaco-workbench .pane-body.integrated-terminal .xterm .xterm-rows > div { font-size: 11px !important; } // Example: Adjust terminal text font size. This is highly dependent on how xterm.js renders fonts. */
+
+	.monaco-workbench .pane-body.integrated-terminal .tabs-list .terminal-tabs-entry {
+		padding-left: 4px;
+		padding-right: 4px;
+		font-size: 11px; /* Smaller font for tab labels */
+	}
+
+	.monaco-workbench .pane-body.integrated-terminal .tabs-list .codicon {
+		font-size: 14px; /* Smaller icons in tabs */
+	}
+
+	.monaco-workbench .pane-body.integrated-terminal .tabs-container > .monaco-toolbar .action-label {
+		font-size: 14px; /* Smaller icons in tab toolbar */
+	}
+	/* Phone-specific terminal refinements */
+}
+
+/* --- END MOBILE STYLES --- */

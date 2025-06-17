@@ -16,3 +16,23 @@
 	flex: 1;
 	padding-left: 5px;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench .part > .composite.title {
+		flex-wrap: wrap; /* Allow items to wrap if they become too crowded */
+	}
+
+	.monaco-workbench .part > .composite.title > .title-actions {
+		padding-left: 0; /* Adjust padding for smaller screens */
+		/* Further refinements for title actions */
+	}
+	/* Further refinements for composite parts */
+}
+
+@media (max-width: 480px) {
+	/* Phone-specific refinements for composite parts */
+}
+
+/* --- END MOBILE STYLES --- */

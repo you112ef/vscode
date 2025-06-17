@@ -242,3 +242,39 @@
 	color: var(--vscode-statusBarItem-offlineHoverForeground);
 	background-color: var(--vscode-statusBarItem-offlineHoverBackground) !important;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.monaco-workbench .part.statusbar > .items-container > .statusbar-item {
+		/* Ensure items can shrink and not cause overflow issues initially */
+		min-width: 0;
+	}
+
+	.monaco-workbench .part.statusbar > .items-container > .statusbar-item > .statusbar-item-label {
+		padding: 0 3px 0 3px; /* Slightly reduce padding */
+	}
+	/* Further refinements for status bar on tablets */
+}
+
+@media (max-width: 480px) {
+	.monaco-workbench .part.statusbar {
+		/* height: 20px; // Optionally reduce height */
+		font-size: 11px; /* Optionally reduce font size */
+	}
+
+	.monaco-workbench .part.statusbar > .items-container > .statusbar-item > .statusbar-item-label {
+		padding: 0 2px 0 2px; /* Further reduce padding */
+		/* Consider hiding less critical items by default via a class, or JS */
+	}
+
+	/* Example: Hiding specific items by a class that could be added via JS or for specific item types */
+	/*
+	.monaco-workbench .part.statusbar > .items-container > .statusbar-item.hide-on-phone {
+		display: none !important;
+	}
+	*/
+	/* Phone-specific refinements for status bar */
+}
+
+/* --- END MOBILE STYLES --- */

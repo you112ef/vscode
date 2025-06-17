@@ -441,3 +441,64 @@
 	user-select: none;
 	-webkit-user-select: none;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.search-view .search-widgets-container {
+		margin-left: 2px; /* Reduce margin */
+		margin-right: 2px; /* Reduce margin */
+	}
+
+	.search-view .search-widget .monaco-inputbox {
+		width: 100%; /* Ensure input takes full width */
+		box-sizing: border-box;
+	}
+
+	.search-view .search-widget .replace-container .monaco-action-bar {
+		margin-left: 2px; /* Reduce margin for replace actions */
+	}
+
+	.search-view .results .monaco-list-row {
+		/* Ensure results are tappable and readable */
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+	.search-view .linematch {
+		line-height: 24px; /* Increase line height for tappability */
+	}
+
+	.search-view .monaco-list .monaco-list-row .monaco-action-bar .action-label {
+		padding: 4px; /* Increase padding for action labels in results */
+	}
+	/* Further refinements for search view on tablets */
+}
+
+@media (max-width: 480px) {
+	.search-view .search-widgets-container {
+		margin-top: 2px;
+		padding-top: 2px;
+		padding-bottom: 2px;
+	}
+	.search-view .search-widget .monaco-inputbox > .ibwrapper > textarea.input {
+		/* font-size: 11px; // Optionally reduce font size of search input */
+		height: 24px !important; /* Adjust height if necessary, ensure !important if needed */
+	}
+
+	.search-view .results .monaco-list-row {
+		line-height: 26px; /* Further adjust line height for phones */
+	}
+
+	.search-view .linematch {
+		line-height: 26px;
+	}
+
+	.search-view .message {
+		padding: 0 10px 4px; /* Reduce padding for messages */
+		/* font-size: 11px; // Optionally reduce font size of messages */
+	}
+	/* Phone-specific refinements for search view */
+}
+
+/* --- END MOBILE STYLES --- */

@@ -117,3 +117,39 @@
 	text-decoration: line-through;
 	text-decoration-color: var(--vscode-editor-foreground, inherit);
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	/* Potential adjustments for tablet-like screens */
+	.monaco-editor .minimap {
+		/* margin-right: 2px; // Example: reduce margin if minimap is kept */
+	}
+	.monaco-editor .scrollbar {
+		/* right: 2px; // Example: adjust scrollbar position */
+	}
+	.monaco-editor .contentWidgets .breadcrumbs { /* Assuming breadcrumbs are content widgets */
+		/* padding: 2px 0; // Example: reduce breadcrumbs padding */
+		/* font-size: 11px; // Example: reduce breadcrumbs font size */
+	}
+	/* Further tablet-specific editor refinements */
+}
+
+@media (max-width: 480px) {
+	/* Potential adjustments for phone screens */
+	.monaco-editor .minimap,
+	.monaco-editor .decorationsOverviewRuler { /* Hide minimap and overview ruler */
+		display: none !important;
+	}
+	.monaco-editor .scrollbar {
+		right: 0 !important; /* Move scrollbar to the very edge if minimap is hidden */
+	}
+	.monaco-editor .margin-view-overlays .line-numbers {
+		/* font-size: 10px; // Example: reduce line number font size */
+		/* padding-right: 4px !important; // Example: reduce line number gutter width */
+	}
+	/* .monaco-editor .view-lines { font-size: 11px; } // If editor content font size needs adjustment */
+	/* Further phone-specific editor refinements */
+}
+
+/* --- END MOBILE STYLES --- */

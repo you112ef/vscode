@@ -396,3 +396,59 @@
 	width: 0;
 	top: 0;
 }
+
+/* --- BEGIN MOBILE STYLES --- */
+
+@media (max-width: 768px) {
+	.quick-input-widget {
+		width: 90% !important; /* Allow dialog to use more width */
+		max-width: 500px; /* But not too wide on tablets */
+		/* top: 10% !important; // Optionally adjust top position */
+	}
+
+	.quick-input-filter .monaco-inputbox .input {
+		/* Ensure input field is full-width if not already */
+		width: 100% !important;
+		box-sizing: border-box;
+	}
+
+	.quick-input-list .quick-input-list-entry {
+		padding: 4px 6px; /* Increase padding for tappability */
+		line-height: 24px; /* Adjust line height for tappability */
+	}
+
+	.quick-input-list .quick-input-list-icon {
+		height: 24px; /* Match line height */
+	}
+
+	/* Ensure font sizes are readable */
+	.quick-input-list .quick-input-list-label,
+	.quick-input-list .quick-input-list-label-meta,
+	.quick-input-list .quick-input-list-entry-keybinding {
+		/* font-size: 13px; // Adjust if necessary from global styles */
+	}
+	/* Further refinements for quick input on tablets */
+}
+
+@media (max-width: 480px) {
+	.quick-input-widget {
+		width: 95% !important; /* More width for phones */
+		max-width: none; /* Allow full designated width */
+		/* top: 5% !important; // Adjust top position for smaller screens */
+		/* max-height: 80vh; // Ensure it doesn't take full screen height */
+	}
+
+	.quick-input-list .monaco-list {
+		max-height: calc(15 * 26px); /* Adjust max height based on new item height */
+	}
+
+	.quick-input-list .quick-input-list-entry {
+		line-height: 26px; /* Further increase for phones */
+	}
+	.quick-input-list .quick-input-list-icon {
+		height: 26px; /* Match line height */
+	}
+	/* Phone-specific refinements for quick input */
+}
+
+/* --- END MOBILE STYLES --- */
