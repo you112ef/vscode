@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار تحسينات VS Code للهواتف المحمولة</title>
+    <style>
+        /* تضمين الأنماط الأساسية لـ VS Code */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            direction: rtl;
+        }
+
+        /* محاكاة أنماط VS Code الأساسية */
+        .monaco-workbench {
+            font-size: 13px;
+            line-height: 1.4em;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            color: #d4d4d4;
+            background-color: #1e1e1e;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .codicon {
+            font-family: codicon;
+            font-size: 16px;
+            color: #d4d4d4;
+        }
+
+        .monaco-button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .action-label {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .sidebar {
+            background-color: #252526;
+            width: 300px;
+            height: 100vh;
+            padding: 8px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .modal {
+            background-color: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px;
+            max-width: 600px;
+        }
+
+        .list-item {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background-color: #2d2d30;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .list-item:hover {
+            background-color: #3c3c3c;
+        }
+
+        /* تطبيق التحسينات المحمولة */
+        @media screen and (max-width: 768px) {
+            .monaco-workbench {
+                transform: scale(0.7);
+                transform-origin: top left;
+                width: 142.857%;
+                height: 142.857%;
+            }
+
+            .codicon {
+                font-size: 18px !important;
+                width: 18px;
+                height: 18px;
+            }
+
+            .monaco-button,
+            .action-label {
+                padding: 6px 8px !important;
+                font-size: 13px !important;
+                border-radius: 6px !important;
+                min-width: 40px !important;
+                min-height: 40px !important;
+                margin: 2px !important;
+            }
+
+            .sidebar {
+                width: 20vw !important;
+                min-width: 200px !important;
+                max-width: 300px !important;
+            }
+
+            .modal {
+                max-width: 90vw !important;
+                max-height: 80vh !important;
+                border-radius: 12px !important;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+            }
+
+            .list-item {
+                padding: 8px 12px !important;
+                min-height: 40px !important;
+                margin-bottom: 2px !important;
+                border-radius: 4px !important;
+            }
+
+            .action-bar .action-label {
+                min-width: 40px !important;
+                min-height: 40px !important;
+                padding: 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+        }
+
+        /* أنماط خاصة للاختبار */
+        .test-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            background-color: #252526;
+        }
+
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #569cd6;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .status-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .status-success {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .status-test {
+            background-color: #ff9800;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="monaco-workbench">
+        <div class="test-container">
+            <h1 style="text-align: center; color: #569cd6; margin-bottom: 30px;">
+                🧪 اختبار تحسينات VS Code للهواتف المحمولة
+            </h1>
+
+            <div class="test-section">
+                <div class="test-title">
+                    📱 الأزرار والعناصر التفاعلية
+                    <span class="status-indicator status-success">✓ محسّن</span>
+                </div>
+                <div class="action-bar">
+                    <button class="monaco-button">حفظ</button>
+                    <button class="monaco-button">فتح</button>
+                    <button class="monaco-button">تشغيل</button>
+                    <span class="action-label">⚙️</span>
+                    <span class="action-label">🗂️</span>
+                    <span class="action-label">🔍</span>
+                </div>
+                <p style="font-size: 12px; color: #cccccc; margin-top: 10px;">
+                    الأزرار الآن بحجم 40×40px كحد أدنى، مع تباعد مناسب للمس
+                </p>
+            </div>
+
+            <div class="test-section">
+                <div class="test-title">
+                    🎨 الأيقونات والرموز
+                    <span class="status-indicator status-success">✓ محسّن</span>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span class="codicon" style="font-size: 18px;">📁</span>
+                    <span class="codicon" style="font-size: 18px;">📄</span>
+                    <span class="codicon" style="font-size: 20px;">⚙️</span>
+                    <span class="codicon" style="font-size: 20px;">🔍</span>
+                    <span class="codicon" style="font-size: 20px;">▶️</span>
+                </div>
+                <p style="font-size: 12px; color: #cccccc; margin-top: 10px;">
+                    الأيقونات الآن بحجم 18-20px لوضوح أفضل على الشاشات الصغيرة
+                </p>
+            </div>
+
+            <div class="demo-grid">
+                <div class="test-section">
+                    <div class="test-title">
+                        📋 القوائم والعناصر
+                        <span class="status-indicator status-success">✓ محسّن</span>
+                    </div>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        <div class="list-item">📄 ملف 1.js</div>
+                        <div class="list-item">📄 ملف 2.css</div>
+                        <div class="list-item">📄 ملف 3.html</div>
+                        <div class="list-item">📁 مجلد المكونات</div>
+                        <div class="list-item">📁 مجلد الأنماط</div>
+                    </div>
+                    <p style="font-size: 12px; color: #cccccc; margin-top: 10px;">
+                        تباعد 8px بين العناصر، ارتفاع أدنى 40px
+                    </p>
+                </div>
+
+                <div class="test-section">
+                    <div class="test-title">
+                        🪟 النوافذ المنبثقة
+                        <span class="status-indicator status-test">🧪 اختبر</span>
+                    </div>
+                    <div class="modal" style="position: relative; max-width: 90vw; max-height: 300px;">
+                        <h3 style="margin-top: 0; color: #569cd6;">نافذة تجريبية</h3>
+                        <p>هذه نافذة منبثقة محسنة للهواتف المحمولة:</p>
+                        <ul style="margin: 10px 0;">
+                            <li>عرض أقصى: 90vw</li>
+                            <li>ارتفاع أقصى: 80vh</li>
+                            <li>زوايا دائرية: 12px</li>
+                            <li>ظل ناعم</li>
+                        </ul>
+                        <button class="monaco-button">موافق</button>
+                        <button class="monaco-button" style="background-color: #3c3c3c;">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <div class="test-title">
+                    📏 الشريط الجانبي
+                    <span class="status-indicator status-success">✓ محسّن</span>
+                </div>
+                <div style="display: flex; border: 1px solid #3c3c3c; border-radius: 8px; overflow: hidden; height: 200px;">
+                    <div class="sidebar" style="position: relative; width: 20vw; min-width: 200px; max-width: 300px;">
+                        <h4 style="margin-top: 0; color: #569cd6;">المستكشف</h4>
+                        <div class="list-item">📁 src</div>
+                        <div class="list-item">📁 public</div>
+                        <div class="list-item">📄 package.json</div>
+                        <div class="list-item">📄 README.md</div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background-color: #1e1e1e;">
+                        <h4 style="margin-top: 0; color: #569cd6;">منطقة المحرر</h4>
+                        <p style="font-size: 13px; line-height: 1.4;">
+                            المحرر الآن محسن للتمرير على الهواتف المحمولة
+                            مع دعم اللمس المحسن والتمرير السلس.
+                        </p>
+                    </div>
+                </div>
+                <p style="font-size: 12px; color: #cccccc; margin-top: 10px;">
+                    الشريط الجانبي بعرض 20vw مع حدود مرنة (200-300px)
+                </p>
+            </div>
+
+            <div class="test-section">
+                <div class="test-title">
+                    📱 استعلامات الوسائط
+                    <span class="status-indicator status-test">🧪 اختبر بتغيير حجم النافذة</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="padding: 15px; background-color: #2d2d30; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #4caf50;">أقل من 480px</h5>
+                        <ul style="font-size: 12px; margin: 5px 0;">
+                            <li>شريط جانبي: 25vw</li>
+                            <li>نوافذ: 95vw</li>
+                            <li>خط: 12px</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 15px; background-color: #2d2d30; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #2196f3;">480px - 768px</h5>
+                        <ul style="font-size: 12px; margin: 5px 0;">
+                            <li>شريط جانبي: 20vw</li>
+                            <li>نوافذ: 90vw</li>
+                            <li>خط: 13px</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 15px; background-color: #2d2d30; border-radius: 8px;">
+                        <h5 style="margin-top: 0; color: #ff9800;">أكبر من 768px</h5>
+                        <ul style="font-size: 12px; margin: 5px 0;">
+                            <li>شريط جانبي: 15vw</li>
+                            <li>نوافذ: 90vw</li>
+                            <li>خط: 13px</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <div class="test-title">
+                    🎯 ملخص التحسينات
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    <div>
+                        <h4 style="color: #4caf50; margin-bottom: 10px;">✅ تم التطبيق</h4>
+                        <ul style="font-size: 13px; line-height: 1.6;">
+                            <li>تقليل حجم العناصر إلى 70%</li>
+                            <li>أيقونات 18-20px</li>
+                            <li>مناطق لمس 40×40px</li>
+                            <li>شريط جانبي متجاوب</li>
+                            <li>نوافذ منبثقة محسنة</li>
+                            <li>ألوان الوضع الداكن</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #ff9800; margin-bottom: 10px;">🔄 قيد التطوير</h4>
+                        <ul style="font-size: 13px; line-height: 1.6;">
+                            <li>دعم الإيماءات</li>
+                            <li>تحسين لوحة المفاتيح</li>
+                            <li>وضع ملء الشاشة</li>
+                            <li>تحسينات الأجهزة اللوحية</li>
+                            <li>إيماءات السحب والإفلات</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #2d2d30; border-radius: 8px;">
+                <h3 style="color: #569cd6; margin-bottom: 10px;">🎉 تم تطبيق التحسينات بنجاح!</h3>
+                <p style="margin: 10px 0; font-size: 14px;">
+                    جرب تغيير حجم النافذة أو فتح الصفحة على هاتفك لرؤية التحسينات في العمل
+                </p>
+                <p style="font-size: 12px; color: #cccccc;">
+                    للحصول على التجربة الكاملة، قم ببناء VS Code مع الملفات المحدثة
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // إضافة تفاعل بسيط لاختبار اللمس
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.monaco-button, .action-label, .list-item');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // تأثير بصري عند الضغط
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                    
+                    // إظهار رسالة في وحدة التحكم
+                    console.log('تم الضغط على:', this.textContent || this.innerHTML);
+                });
+                
+                // إضافة تأثير التمرير
+                button.addEventListener('mouseover', function() {
+                    this.style.transition = 'all 0.2s ease';
+                });
+            });
+            
+            // إضافة معلومات الجهاز إلى وحدة التحكم
+            console.log('معلومات الجهاز:');
+            console.log('عرض الشاشة:', window.innerWidth);
+            console.log('ارتفاع الشاشة:', window.innerHeight);
+            console.log('نسبة البكسل:', window.devicePixelRatio);
+            console.log('عامل المستخدم:', navigator.userAgent);
+        });
+        
+        // مراقبة تغيير حجم النافذة
+        window.addEventListener('resize', function() {
+            console.log('تم تغيير حجم النافذة إلى:', window.innerWidth, 'x', window.innerHeight);
+        });
+    </script>
+</body>
+</html>

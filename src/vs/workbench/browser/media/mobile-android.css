@@ -1,0 +1,334 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*
+ * VS Code Mobile Android Optimizations
+ * هذا الملف يحتوي على تحسينات لجعل VS Code متوافق مع الهواتف الذكية
+ */
+
+/* =========================== إعدادات عامة / General Settings =========================== */
+
+/* تقليل حجم العناصر إلى 70% من الحجم الأصلي */
+/* Scale down elements to 70% of original size */
+.monaco-workbench {
+	font-size: 13px; /* الخط الافتراضي / Default font */
+	transform: scale(0.7);
+	transform-origin: top left;
+	width: 142.857%; /* 100% / 0.7 = 142.857% للحفاظ على العرض الكامل */
+	height: 142.857%;
+}
+
+/* استخدام وحدات متجاوبة / Use responsive units */
+.monaco-workbench {
+	position: relative;
+	overflow: hidden;
+	height: 100vh;
+	width: 100vw;
+}
+
+/* =========================== الأيقونات / Icons =========================== */
+
+/* حجم الأيقونات 18-20px */
+/* Icon size 18-20px */
+.monaco-workbench .codicon[class*='codicon-'] {
+	font-size: 18px !important;
+	width: 18px;
+	height: 18px;
+}
+
+/* أيقونات أكبر للعناصر المهمة */
+/* Larger icons for important elements */
+.monaco-workbench .title .codicon[class*='codicon-'],
+.monaco-workbench .action-bar .codicon[class*='codicon-'] {
+	font-size: 20px !important;
+	width: 20px;
+	height: 20px;
+}
+
+/* =========================== الأزرار / Buttons =========================== */
+
+/* تصميم الأزرار للهاتف المحمول */
+/* Mobile-friendly button design */
+.monaco-workbench .monaco-button,
+.monaco-workbench .action-label,
+.monaco-workbench button,
+.monaco-workbench input[type="button"] {
+	padding: 6px 8px !important; /* 6px عمودي، 8px أفقي / 6px vertical, 8px horizontal */
+	font-size: 13px !important;
+	border-radius: 6px !important;
+	min-width: 40px !important; /* الحد الأدنى للمس / Minimum touch area */
+	min-height: 40px !important;
+	line-height: 1.2;
+	margin: 2px !important; /* مساحة بين الأزرار / Space between buttons */
+}
+
+/* أزرار منطقة اللمس الكبيرة */
+/* Large touch area buttons */
+.monaco-workbench .monaco-action-bar .action-item .action-label {
+	min-width: 40px !important;
+	min-height: 40px !important;
+	padding: 10px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+/* تباعد بين العناصر 4-6px */
+/* Element spacing 4-6px */
+.monaco-workbench .monaco-action-bar .action-item {
+	margin: 0 3px !important; /* 3px على كل جانب = 6px بين العناصر */
+}
+
+/* =========================== الشريط الجانبي / Sidebar =========================== */
+
+/* عرض الشريط الجانبي 20vw */
+/* Sidebar width 20vw */
+.monaco-workbench .part.sidebar {
+	width: 20vw !important;
+	min-width: 200px !important; /* الحد الأدنى للعرض / Minimum width */
+	max-width: 300px !important; /* الحد الأقصى للعرض / Maximum width */
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+}
+
+/* تحسين التمرير في الشريط الجانبي */
+/* Improve sidebar scrolling */
+.monaco-workbench .part.sidebar .content {
+	padding: 8px !important;
+	touch-action: pan-y !important; /* السماح بالتمرير العمودي فقط */
+}
+
+/* إخفاء/إظهار الشريط الجانبي بسهولة */
+/* Easy sidebar toggle */
+.monaco-workbench .part.sidebar.hidden {
+	width: 0 !important;
+	transition: width 0.3s ease !important;
+}
+
+.monaco-workbench .part.sidebar:not(.hidden) {
+	transition: width 0.3s ease !important;
+}
+
+/* =========================== النوافذ المنبثقة / Modals & Popovers =========================== */
+
+/* تصميم النوافذ المنبثقة للهاتف */
+/* Mobile modal design */
+.monaco-workbench .monaco-dialog-box,
+.monaco-workbench .context-view,
+.monaco-workbench .suggest-widget,
+.monaco-workbench .quick-input-widget {
+	max-width: 90vw !important;
+	max-height: 80vh !important;
+	border-radius: 12px !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important; /* ظل ناعم / Soft shadow */
+	margin: 5vh auto !important; /* وسط الشاشة / Center on screen */
+}
+
+/* تحسين النوافذ المنبثقة للمس */
+/* Touch-optimized modals */
+.monaco-workbench .monaco-dialog-box .dialog-message-container {
+	padding: 16px !important;
+	font-size: 14px !important;
+	line-height: 1.5 !important;
+}
+
+/* =========================== القوائم / Lists =========================== */
+
+/* تباعد 8px في القوائم */
+/* 8px spacing in lists */
+.monaco-workbench .monaco-list .monaco-list-row {
+	padding: 8px 12px !important;
+	min-height: 40px !important; /* منطقة لمس كافية / Adequate touch area */
+	margin-bottom: 2px !important;
+	border-radius: 4px !important;
+}
+
+/* تحسين القوائم الطويلة */
+/* Improve long lists */
+.monaco-workbench .monaco-list {
+	touch-action: pan-y !important;
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+}
+
+/* =========================== المحرر / Editor =========================== */
+
+/* تحسين المحرر للهاتف */
+/* Mobile editor improvements */
+.monaco-workbench .editor-container {
+	touch-action: pan-y pan-x !important; /* السماح بالتمرير في جميع الاتجاهات */
+}
+
+/* حجم خط المحرر */
+/* Editor font size */
+.monaco-workbench .monaco-editor {
+	font-size: 13px !important;
+	line-height: 1.4 !important;
+}
+
+/* تحسين أشرطة التمرير */
+/* Improve scrollbars */
+.monaco-workbench .monaco-scrollable-element .scrollbar {
+	width: 8px !important;
+	height: 8px !important;
+}
+
+/* =========================== الألوان - الوضع الداكن / Colors - Dark Mode =========================== */
+
+/* الوضع الداكن كافتراضي */
+/* Dark mode as default */
+.monaco-workbench {
+	--vscode-editor-background: #1e1e1e !important;
+	--vscode-editor-foreground: #d4d4d4 !important;
+	--vscode-button-background: #007acc !important;
+	--vscode-button-foreground: #ffffff !important;
+	--vscode-button-hoverBackground: #005a9e !important;
+	--vscode-input-background: #3c3c3c !important;
+	--vscode-input-foreground: #d4d4d4 !important;
+	--vscode-sidebar-background: #252526 !important;
+	--vscode-sidebar-foreground: #cccccc !important;
+	background-color: #1e1e1e !important;
+	color: #d4d4d4 !important;
+}
+
+/* الأزرار النشطة */
+/* Active buttons */
+.monaco-workbench .monaco-button:not(.disabled),
+.monaco-workbench .action-label:not(.disabled) {
+	background-color: #007acc !important;
+	color: #ffffff !important;
+}
+
+/* الأزرار غير النشطة */
+/* Inactive buttons */
+.monaco-workbench .monaco-button.disabled,
+.monaco-workbench .action-label.disabled {
+	background-color: #3c3c3c !important;
+	color: #858585 !important;
+}
+
+/* =========================== التحسينات للمس / Touch Optimizations =========================== */
+
+/* تحسين الاستجابة للمس */
+/* Improve touch responsiveness */
+.monaco-workbench * {
+	touch-action: manipulation !important; /* منع التكبير المزدوج / Prevent double-tap zoom */
+}
+
+/* مناطق اللمس الآمنة */
+/* Safe touch areas */
+.monaco-workbench .monaco-action-bar .action-item,
+.monaco-workbench .monaco-button,
+.monaco-workbench .quick-input-list .quick-input-list-entry {
+	min-width: 44px !important; /* Apple/Google guidelines */
+	min-height: 44px !important;
+}
+
+/* تحسين الاختيار النصي */
+/* Improve text selection */
+.monaco-workbench .monaco-editor .view-lines {
+	user-select: text !important;
+	-webkit-user-select: text !important;
+}
+
+/* =========================== تحسينات الأداء / Performance Optimizations =========================== */
+
+/* تحسين الرسوم المتحركة للهاتف */
+/* Optimize animations for mobile */
+.monaco-workbench * {
+	will-change: auto !important;
+	backface-visibility: hidden !important;
+}
+
+/* تقليل التأثيرات البصرية المكلفة */
+/* Reduce expensive visual effects */
+.monaco-workbench .monaco-tree .monaco-tree-row,
+.monaco-workbench .monaco-list .monaco-list-row {
+	transition: background-color 0.1s ease !important;
+}
+
+/* =========================== استعلامات الوسائط / Media Queries =========================== */
+
+/* تحسينات خاصة للشاشات الصغيرة جداً */
+/* Optimizations for very small screens */
+@media (max-width: 480px) {
+	.monaco-workbench .part.sidebar {
+		width: 25vw !important;
+		min-width: 150px !important;
+	}
+	
+	.monaco-workbench .monaco-dialog-box,
+	.monaco-workbench .quick-input-widget {
+		max-width: 95vw !important;
+		max-height: 85vh !important;
+	}
+	
+	.monaco-workbench .monaco-button,
+	.monaco-workbench .action-label {
+		font-size: 12px !important;
+		padding: 8px 10px !important;
+	}
+}
+
+/* تحسينات للشاشات الكبيرة نسبياً */
+/* Optimizations for relatively larger screens */
+@media (min-width: 768px) {
+	.monaco-workbench .part.sidebar {
+		width: 15vw !important;
+		max-width: 250px !important;
+	}
+}
+
+/* تحسين الاتجاه الأفقي */
+/* Landscape orientation optimizations */
+@media (orientation: landscape) {
+	.monaco-workbench .part.sidebar {
+		width: 25vw !important;
+	}
+	
+	.monaco-workbench .monaco-dialog-box {
+		max-height: 90vh !important;
+	}
+}
+
+/* =========================== إصلاحات إضافية / Additional Fixes =========================== */
+
+/* إصلاح مشكلة فائض النص */
+/* Fix text overflow issues */
+.monaco-workbench .monaco-list .monaco-list-row .monaco-tree-element,
+.monaco-workbench .quick-input-list .quick-input-list-entry {
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: nowrap !important;
+}
+
+/* تحسين إمكانية الوصول */
+/* Improve accessibility */
+.monaco-workbench button:focus,
+.monaco-workbench .action-label:focus {
+	outline: 2px solid #007acc !important;
+	outline-offset: 2px !important;
+}
+
+/* إضافة مساحة تنفس للعناصر */
+/* Add breathing room for elements */
+.monaco-workbench .part > .content {
+	padding: 8px !important;
+}
+
+.monaco-workbench .monaco-panel .panel-header {
+	padding: 8px 12px !important;
+	min-height: 40px !important;
+}
+
+/* تحسين شريط التبويب */
+/* Improve tab bar */
+.monaco-workbench .tabs-container .tab {
+	min-width: 80px !important;
+	padding: 8px 12px !important;
+	font-size: 12px !important;
+}
+
+/* النهاية / End */
