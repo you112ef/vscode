@@ -1,434 +1,288 @@
 #!/bin/bash
 
-# 🚀 VS Code Mobile Android APK Builder
-# سكريبت بناء APK للأندرويد بشكل تلقائي
-
-set -e  # إيقاف السكريبت عند أي خطأ
-
-# الألوان للعرض
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# رسائل ملونة
-print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
-print_header() {
-    echo -e "\n${BLUE}$1${NC}"
-    echo "=================================="
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
 }
 
-# التحقق من المتطلبات
-check_requirements() {
-    print_header "🔍 التحقق من المتطلبات"
-    
-    # Node.js
-    if ! command -v node &> /dev/null; then
-        print_error "Node.js غير مثبت. يرجى تثبيت Node.js 18+"
-        exit 1
-    else
-        NODE_VERSION=$(node -v)
-        print_success "Node.js مثبت: $NODE_VERSION"
-    fi
-    
-    # npm
-    if ! command -v npm &> /dev/null; then
-        print_error "npm غير مثبت"
-        exit 1
-    else
-        NPM_VERSION=$(npm -v)
-        print_success "npm مثبت: $NPM_VERSION"
-    fi
-    
-    # Java
-    if ! command -v java &> /dev/null; then
-        print_warning "Java غير مثبت. سيتم المحاولة بدونه."
-    else
-        JAVA_VERSION=$(java -version 2>&1 | head -n 1)
-        print_success "Java مثبت: $JAVA_VERSION"
-    fi
-    
-    # Android SDK
-    if [ -z "$ANDROID_HOME" ]; then
-        print_warning "ANDROID_HOME غير مُعرّف. قد تواجه مشاكل في البناء."
-    else
-        print_success "Android SDK: $ANDROID_HOME"
-    fi
-}
+# Check prerequisites
+print_status "Checking prerequisites..."
 
-# تنظيف الملفات القديمة
-clean_build() {
-    print_header "🧹 تنظيف الملفات القديمة"
-    
-    rm -rf mobile-build/
-    rm -rf apk-output/
-    rm -rf out/
-    rm -rf node_modules/.cache
-    
-    print_success "تم تنظيف الملفات القديمة"
-}
+if ! command_exists node; then
+    print_error "Node.js is not installed. Please install Node.js 18 or later."
+    exit 1
+fi
 
-# تثبيت Dependencies
-install_dependencies() {
-    print_header "📦 تثبيت المتطلبات"
-    
-    print_info "تثبيت VS Code dependencies..."
-    npm ci || npm install
-    
-    print_info "تثبيت Capacitor CLI عالمياً..."
-    npm install -g @capacitor/cli @ionic/cli || {
-        print_warning "فشل التثبيت العالمي، نستكمل بدونه"
-    }
-    
-    print_success "تم تثبيت جميع المتطلبات"
-}
+if ! command_exists npm; then
+    print_error "npm is not installed. Please install npm."
+    exit 1
+fi
 
-# بناء VS Code
-build_vscode() {
-    print_header "⚙️ بناء VS Code"
-    
-    print_info "تشغيل webpack لبناء VS Code..."
-    npm run compile || npm run build || {
-        print_warning "فشل البناء العادي، نحاول طريقة بديلة"
-        
-        # إنشاء بنية أساسية للاختبار
-        mkdir -p out
-        cp -r src/vs/workbench/browser/media/* out/ 2>/dev/null || true
-        
-        # إنشاء index.html أساسي
-        cat > out/index.html << 'EOF'
+# Check Node.js version
+NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+if [ "$NODE_VERSION" -lt 18 ]; then
+    print_error "Node.js version must be 18 or later. Current version: $(node -v)"
+    exit 1
+fi
+
+print_success "Prerequisites check passed!"
+
+# Step 1: Install VS Code dependencies
+print_status "Installing VS Code dependencies..."
+if ! npm ci; then
+    print_error "Failed to install VS Code dependencies"
+    exit 1
+fi
+
+# Step 2: Compile VS Code
+print_status "Compiling VS Code..."
+if ! npm run compile; then
+    print_error "Failed to compile VS Code"
+    exit 1
+fi
+
+# Step 3: Set up mobile build environment
+print_status "Setting up mobile build environment..."
+rm -rf mobile-build
+mkdir -p mobile-build
+cp mobile-package.json mobile-build/package.json
+if [ -f "capacitor.config.ts" ]; then
+    cp capacitor.config.ts mobile-build/
+fi
+
+# Step 4: Install mobile dependencies
+print_status "Installing mobile dependencies..."
+cd mobile-build
+if ! npm install; then
+    print_error "Failed to install mobile dependencies"
+    exit 1
+fi
+
+# Install Ionic and Capacitor CLI globally
+print_status "Installing Ionic and Capacitor CLI..."
+if ! npm install -g @ionic/cli @capacitor/cli; then
+    print_warning "Failed to install CLI tools globally, trying locally..."
+    npm install @ionic/cli @capacitor/cli
+fi
+
+# Step 5: Prepare web assets
+print_status "Preparing web assets..."
+mkdir -p www
+cd ..
+
+# Copy VS Code build output
+if [ -d "out" ]; then
+    print_status "Copying VS Code build output..."
+    cp -r out/* mobile-build/www/
+else
+    print_warning "No VS Code build output found, creating basic structure..."
+fi
+
+# Copy mobile CSS
+if [ -f "src/vs/workbench/browser/media/mobile-android.css" ]; then
+    cp src/vs/workbench/browser/media/mobile-android.css mobile-build/www/
+fi
+
+# Create mobile index.html
+print_status "Creating mobile index.html..."
+cat > mobile-build/www/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VS Code Mobile</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mobile-android.css">
     <style>
         body { 
-            margin: 0; padding: 20px; 
-            background: #1e1e1e; color: #d4d4d4; 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; 
+            padding: 0; 
+            background: #1e1e1e; 
+            color: #d4d4d4; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        .container { max-width: 800px; margin: 0 auto; text-align: center; }
-        .logo { font-size: 48px; margin: 40px 0; }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 40px 0; }
-        .feature { background: #252526; padding: 20px; border-radius: 8px; }
-        .feature h3 { color: #569cd6; margin: 0 0 10px 0; }
+        .app-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        .logo { font-size: 48px; margin-bottom: 20px; }
+        .title { font-size: 24px; margin-bottom: 10px; }
+        .subtitle { font-size: 16px; opacity: 0.8; }
+        .loading { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <div class="logo">📱</div>
-        <h1>مرحباً بك في VS Code Mobile</h1>
-        <p>محرر الأكواد المتقدم مُحسن للهواتف الذكية</p>
-        
-        <div class="features">
-            <div class="feature">
-                <h3>🎨 واجهة محسنة</h3>
-                <p>تصميم متجاوب مع دعم اللمس</p>
-            </div>
-            <div class="feature">
-                <h3>🌙 وضع داكن</h3>
-                <p>يوفر الطاقة ويريح العين</p>
-            </div>
-            <div class="feature">
-                <h3>⚡ أداء سريع</h3>
-                <p>محسن لاستهلاك الموارد</p>
-            </div>
-            <div class="feature">
-                <h3>🌍 دعم العربية</h3>
-                <p>واجهة تدعم RTL كاملة</p>
-            </div>
-        </div>
-        
-        <button onclick="window.location.reload()" style="
-            background: #007acc; color: white; border: none; 
-            padding: 12px 24px; border-radius: 6px; 
-            font-size: 16px; cursor: pointer;
-        ">🔄 إعادة تحميل</button>
+        <div class="title">VS Code Mobile</div>
+        <div class="subtitle loading">مرحباً بك في VS Code المحمول!</div>
     </div>
-    
-    <script>
-        console.log('VS Code Mobile loaded successfully!');
-        if (typeof Capacitor !== 'undefined') {
-            console.log('Running in Capacitor');
-        }
+    <script type="module">
+        import { Capacitor } from '@capacitor/core';
+        import { StatusBar } from '@capacitor/status-bar';
+        import { SplashScreen } from '@capacitor/splash-screen';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (Capacitor.isNativePlatform()) {
+                try {
+                    await StatusBar.setBackgroundColor({ color: '#1e1e1e' });
+                    await StatusBar.setStyle({ style: 'DARK' });
+                    await SplashScreen.hide();
+                } catch (e) {
+                    console.log('Capacitor plugins not available in web mode');
+                }
+            }
+            
+            setTimeout(() => {
+                document.querySelector('.subtitle').textContent = 'VS Code Mobile جاهز للاستخدام!';
+                document.querySelector('.loading').classList.remove('loading');
+            }, 2000);
+        });
     </script>
 </body>
 </html>
 EOF
-    }
-    
-    print_success "تم بناء VS Code"
-}
 
-# إعداد مشروع المحمول
-setup_mobile_project() {
-    print_header "📱 إعداد مشروع المحمول"
-    
-    # إنشاء مجلد البناء المحمول
-    mkdir -p mobile-build
-    
-    # نسخ ملفات الإعدادات
-    cp mobile-package.json mobile-build/package.json
-    cp capacitor.config.ts mobile-build/
-    
-    # نسخ ملفات البناء
-    mkdir -p mobile-build/out
-    cp -r out/* mobile-build/out/ 2>/dev/null || {
-        print_warning "لم يتم العثور على ملفات البناء، إنشاء ملفات أساسية"
-        mkdir -p mobile-build/out
-        echo "<h1>VS Code Mobile</h1>" > mobile-build/out/index.html
-    }
-    
-    # التأكد من وجود CSS المحمول
-    cp src/vs/workbench/browser/media/mobile-android.css mobile-build/out/ 2>/dev/null || {
-        print_warning "ملف CSS المحمول غير موجود، إنشاء ملف أساسي"
-        echo "/* VS Code Mobile CSS */" > mobile-build/out/mobile-android.css
-    }
-    
-    print_success "تم إعداد مشروع المحمول"
-}
+# Step 6: Initialize Capacitor
+cd mobile-build
+print_status "Initializing Capacitor project..."
+if ! npx cap init "VS Code Mobile" "com.vscode.mobile.android" --web-dir=www; then
+    print_error "Failed to initialize Capacitor project"
+    exit 1
+fi
 
-# تثبيت dependencies المحمولة
-install_mobile_dependencies() {
-    print_header "📲 تثبيت متطلبات المحمول"
-    
-    cd mobile-build
-    
-    print_info "تثبيت Capacitor dependencies..."
-    npm install
-    
-    print_info "إضافة منصة Android..."
-    npx cap add android || {
-        print_warning "فشل في إضافة Android platform، نحاول مرة أخرى"
-        npm install -g @capacitor/cli
-        npx cap add android
-    }
-    
-    cd ..
-    print_success "تم تثبيت متطلبات المحمول"
-}
+# Step 7: Add Android platform
+print_status "Adding Android platform..."
+if ! npx cap add android; then
+    print_error "Failed to add Android platform"
+    exit 1
+fi
 
-# إعداد Android
-setup_android() {
-    print_header "🤖 إعداد Android"
-    
-    cd mobile-build
-    
-    # إنشاء AndroidManifest.xml
-    mkdir -p android/app/src/main
-    cat > android/app/src/main/AndroidManifest.xml << 'EOF'
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vscode.mobile.android">
+# Step 8: Sync and copy assets
+print_status "Syncing Capacitor assets..."
+npx cap sync android
+npx cap copy android
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/AppTheme.NoActionBarLaunch">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
-EOF
-
-    # نسخ ملفات النصوص
-    mkdir -p android/app/src/main/res/values
-    cp ../android/app/src/main/res/values/strings.xml android/app/src/main/res/values/ 2>/dev/null || {
-        cat > android/app/src/main/res/values/strings.xml << 'EOF'
+# Step 9: Configure Android app
+print_status "Configuring Android app..."
+cat > android/app/src/main/res/values/strings.xml << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">VS Code Mobile</string>
     <string name="title_activity_main">VS Code Mobile</string>
     <string name="package_name">com.vscode.mobile.android</string>
+    <string name="custom_url_scheme">vscode-mobile</string>
 </resources>
 EOF
-    }
-    
-    # مزامنة Capacitor
-    print_info "مزامنة Capacitor..."
-    npx cap sync android
-    
-    cd ..
-    print_success "تم إعداد Android"
-}
 
-# بناء APK
-build_apk() {
-    print_header "🔨 بناء APK"
-    
-    cd mobile-build/android
-    
-    # التحقق من gradlew
-    if [ ! -f gradlew ]; then
-        print_error "ملف gradlew غير موجود"
-        cd ../..
-        return 1
-    fi
-    
-    # إعطاء صلاحيات التنفيذ
-    chmod +x gradlew
-    
-    print_info "بناء APK للتطوير..."
-    ./gradlew assembleDebug --stacktrace || {
-        print_error "فشل في بناء APK للتطوير"
-        cd ../..
-        return 1
-    }
-    
-    print_info "محاولة بناء APK للإنتاج..."
-    ./gradlew assembleRelease --stacktrace || {
-        print_warning "فشل في بناء APK للإنتاج، نستخدم إصدار التطوير"
-    }
-    
-    cd ../..
-    print_success "تم بناء APK"
-}
+# Step 10: Build APK
+print_status "Building Android APK..."
+cd android
+chmod +x gradlew
 
-# نسخ APK
-copy_apk() {
-    print_header "📦 تجهيز APK للتوزيع"
-    
-    mkdir -p apk-output
-    
-    # البحث عن ملفات APK
-    if [ -f mobile-build/android/app/build/outputs/apk/release/app-release.apk ]; then
-        cp mobile-build/android/app/build/outputs/apk/release/app-release.apk apk-output/vscode-mobile-release.apk
-        print_success "تم نسخ APK الإنتاج"
-    elif [ -f mobile-build/android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
-        cp mobile-build/android/app/build/outputs/apk/release/app-release-unsigned.apk apk-output/vscode-mobile-release-unsigned.apk
-        print_success "تم نسخ APK الإنتاج (غير موقع)"
-    fi
-    
-    if [ -f mobile-build/android/app/build/outputs/apk/debug/app-debug.apk ]; then
-        cp mobile-build/android/app/build/outputs/apk/debug/app-debug.apk apk-output/vscode-mobile-debug.apk
-        print_success "تم نسخ APK التطوير"
-    fi
-    
-    # إنشاء معلومات البناء
-    cat > apk-output/BUILD_INFO.md << EOF
-# VS Code Mobile APK Build Information
+print_status "Building debug APK..."
+if ./gradlew assembleDebug --stacktrace; then
+    print_success "Debug APK built successfully!"
+else
+    print_error "Failed to build debug APK"
+    exit 1
+fi
 
-## Build Details
-- **Build Date**: $(date)
-- **Build Type**: Development & Release
-- **Package Name**: com.vscode.mobile.android
-- **Version**: 1.0.0
+print_status "Building release APK..."
+if ./gradlew assembleRelease --stacktrace; then
+    print_success "Release APK built successfully!"
+else
+    print_warning "Release APK build failed, but debug APK is available"
+fi
 
-## Files Included
-$(ls -la apk-output/ | grep .apk)
+# Step 11: Copy APKs to output directory
+cd ../..
+mkdir -p apk-output
 
-## Installation Instructions
-1. Enable "Unknown Sources" in Android settings
-2. Download and install the APK file
-3. Launch "VS Code Mobile" from app drawer
+print_status "Copying APK files..."
 
-## Features
-- Mobile-optimized VS Code interface
-- Touch-friendly controls (40×40px minimum)
-- Dark mode by default
-- RTL language support
-- Responsive design for all screen sizes
-- File system access permissions
-- Smooth scrolling and touch interactions
+if [ -f "mobile-build/android/app/build/outputs/apk/release/app-release.apk" ]; then
+    cp mobile-build/android/app/build/outputs/apk/release/app-release.apk apk-output/vscode-mobile-release.apk
+    print_success "Release APK copied to apk-output/vscode-mobile-release.apk"
+elif [ -f "mobile-build/android/app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+    cp mobile-build/android/app/build/outputs/apk/release/app-release-unsigned.apk apk-output/vscode-mobile-release-unsigned.apk
+    print_success "Unsigned release APK copied to apk-output/vscode-mobile-release-unsigned.apk"
+fi
 
-## System Requirements
-- Android 7.0+ (API level 24)
-- 2GB RAM minimum
-- 100MB free storage
-- ARM64 or x86_64 processor
+if [ -f "mobile-build/android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+    cp mobile-build/android/app/build/outputs/apk/debug/app-debug.apk apk-output/vscode-mobile-debug.apk
+    print_success "Debug APK copied to apk-output/vscode-mobile-debug.apk"
+fi
 
-## Support
-Report issues at: https://github.com/YOUR_USERNAME/vscode-mobile-android/issues
+# Create build info
+cat > apk-output/BUILD_INFO.md << EOF
+# VS Code Mobile APK Build
+
+**Build Date:** $(date)
+**Build Script:** build-apk.sh
+**Node Version:** $(node -v)
+**npm Version:** $(npm -v)
+
+## Available APKs:
+$(ls -la apk-output/*.apk 2>/dev/null || echo "No APK files found")
+
+## Installation Instructions:
+1. Enable "Unknown sources" in Android Settings > Security
+2. Download the APK file to your Android device
+3. Open the APK file and install
+4. Enjoy VS Code Mobile!
+
+## APK Types:
+- **debug.apk**: For development and testing, larger file size
+- **release.apk**: Optimized for production, smaller file size (if available)
+- **release-unsigned.apk**: Release build but not signed for store distribution
+
+## Troubleshooting:
+- If installation fails, make sure you have Android 7.0+ (API level 24)
+- Ensure you have at least 100MB free space
+- Try the debug APK if release APK doesn't work
 EOF
-    
-    print_success "تم تجهيز ملفات التوزيع"
-}
 
-# عرض النتائج
-show_results() {
-    print_header "🎉 النتائج النهائية"
-    
-    if [ -d apk-output ] && [ "$(ls -A apk-output/*.apk 2>/dev/null)" ]; then
-        print_success "تم بناء APK بنجاح!"
-        echo ""
-        print_info "الملفات المُنشأة:"
-        ls -la apk-output/
-        echo ""
-        print_info "لتثبيت APK على جهازك:"
-        echo "1. فعّل 'مصادر غير معروفة' في إعدادات الأندرويد"
-        echo "2. انسخ ملف APK إلى جهازك"
-        echo "3. افتح الملف واتبع تعليمات التثبيت"
-        echo ""
-        print_info "لرفع APK إلى GitHub:"
-        echo "git add apk-output/"
-        echo "git commit -m 'Add VS Code Mobile APK'"
-        echo "git push origin main"
-    else
-        print_error "فشل في إنشاء APK"
-        echo ""
-        print_info "للحصول على المساعدة:"
-        echo "1. تحقق من أن Node.js مثبت (18+)"
-        echo "2. تحقق من أن Java مثبت (JDK 17+)"
-        echo "3. تحقق من أن Android SDK مثبت"
-        echo "4. راجع الأخطاء أعلاه"
-    fi
-}
+print_success "📱 APK build completed!"
+echo ""
+print_status "Available APK files:"
+ls -la apk-output/*.apk 2>/dev/null || print_warning "No APK files found in output directory"
 
-# تشغيل البناء
-main() {
-    echo ""
-    echo "🚀 VS Code Mobile APK Builder"
-    echo "==============================="
-    echo ""
-    
-    check_requirements
-    clean_build
-    install_dependencies
-    build_vscode
-    setup_mobile_project
-    install_mobile_dependencies
-    setup_android
-    build_apk
-    copy_apk
-    show_results
-    
-    echo ""
-    print_success "🎊 اكتمل البناء!"
-}
-
-# تشغيل السكريبت
-main "$@"
+echo ""
+print_success "🎉 Build completed successfully!"
+print_status "APK files are available in the 'apk-output' directory"
+print_status "Check BUILD_INFO.md for detailed build information"
