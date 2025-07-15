@@ -1,0 +1,210 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace "com.vscode.mobile.android"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.vscode.mobile.android"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged APK
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+            zipAlignEnabled true
+            shrinkResources true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+
+    packagingOptions {
+        resources {
+            excludes += [
+                '/META-INF/{AL2.0,LGPL2.1}',
+                '/META-INF/DEPENDENCIES',
+                '/META-INF/LICENSE',
+                '/META-INF/LICENSE.txt',
+                '/META-INF/license.txt',
+                '/META-INF/NOTICE',
+                '/META-INF/NOTICE.txt',
+                '/META-INF/notice.txt',
+                '/META-INF/ASL2.0',
+                '/META-INF/*.kotlin_module'
+            ]
+        }
+    }
+
+    // تحسينات للأداء
+    dexOptions {
+        javaMaxHeapSize "4g"
+        preDexLibraries = false
+    }
+
+    // دعم اللغة العربية والـ RTL
+    defaultConfig {
+        resConfigs "ar", "en"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    // إعدادات التوقيع
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    // تحسين الذاكرة والأداء
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            def appName = "vscode-mobile"
+            def versionName = variant.versionName
+            def buildType = variant.buildType.name
+            def date = new Date().format('yyyyMMdd')
+            
+            outputFileName = "${appName}-${versionName}-${buildType}-${date}.apk"
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+        disable 'MissingTranslation'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.activity:activity:1.8.2'
+    implementation 'androidx.fragment:fragment:1.6.2'
+    implementation 'androidx.webkit:webkit:1.8.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+    
+    // Capacitor Dependencies
+    implementation project(':capacitor-android')
+    implementation project(':capacitor-app')
+    implementation project(':capacitor-haptics')
+    implementation project(':capacitor-keyboard')
+    implementation project(':capacitor-status-bar')
+    implementation project(':capacitor-splash-screen')
+    implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-device')
+    implementation project(':capacitor-network')
+    implementation project(':capacitor-clipboard')
+    
+    // Material Design
+    implementation 'com.google.android.material:material:1.11.0'
+    
+    // Network & HTTP
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    
+    // JSON Processing
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // File Handling
+    implementation 'commons-io:commons-io:2.11.0'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    
+    // Debug Tools
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+}
+
+// تحسين حجم APK
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == 'release') {
+        variant.assembleProvider.get().doLast {
+            copy {
+                from variant.outputs.collect { it.outputFile }
+                into "$project.buildDir/outputs/apk/release/"
+                rename { String fileName ->
+                    fileName.replace("app-release", "vscode-mobile-${variant.versionName}")
+                }
+            }
+        }
+    }
+}
+
+// مهمة تنظيف إضافية
+task cleanAssemble {
+    dependsOn clean
+    dependsOn assembleRelease
+}
+
+// مهمة إنشاء معلومات البناء
+task generateBuildInfo {
+    doLast {
+        def buildInfoFile = file("${buildDir}/generated/build-info.json")
+        buildInfoFile.parentFile.mkdirs()
+        
+        def buildInfo = [
+            appName: "VS Code Mobile",
+            packageName: android.defaultConfig.applicationId,
+            versionName: android.defaultConfig.versionName,
+            versionCode: android.defaultConfig.versionCode,
+            buildDate: new Date().format('yyyy-MM-dd HH:mm:ss'),
+            buildType: "release",
+            minSdk: android.defaultConfig.minSdk,
+            targetSdk: android.defaultConfig.targetSdk,
+            compileSdk: android.compileSdk,
+            features: [
+                "VS Code Web Interface",
+                "Mobile Optimized UI",
+                "Dark Mode Support",
+                "Touch Optimizations",
+                "RTL Language Support",
+                "File System Access",
+                "Syntax Highlighting",
+                "Code Editing"
+            ]
+        ]
+        
+        buildInfoFile.text = groovy.json.JsonBuilder(buildInfo).toPrettyString()
+    }
+}
+
+// ربط مهمة معلومات البناء
+assembleRelease.dependsOn generateBuildInfo

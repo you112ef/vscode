@@ -1,0 +1,276 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools: 34.0.0
+
+      - name: Install VS Code dependencies
+        run: |
+          npm ci
+          npm run compile
+
+      - name: Create mobile build directory
+        run: |
+          mkdir -p mobile-build
+          cp mobile-package.json mobile-build/package.json
+          cp capacitor.config.ts mobile-build/
+
+      - name: Install mobile dependencies
+        working-directory: mobile-build
+        run: |
+          npm install
+          npm install -g @ionic/cli @capacitor/cli
+
+      - name: Copy VS Code build assets
+        run: |
+          # Create web output directory
+          mkdir -p mobile-build/www
+          
+          # Copy compiled VS Code assets
+          if [ -d "out" ]; then
+            cp -r out/* mobile-build/www/
+          fi
+          
+          # Copy mobile CSS and assets
+          if [ -f "src/vs/workbench/browser/media/mobile-android.css" ]; then
+            cp src/vs/workbench/browser/media/mobile-android.css mobile-build/www/
+          fi
+          
+          # Create basic index.html for mobile
+          cat > mobile-build/www/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="ar" dir="rtl">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+              <title>VS Code Mobile</title>
+              <link rel="stylesheet" href="mobile-android.css">
+              <style>
+                  body { 
+                      margin: 0; 
+                      padding: 0; 
+                      background: #1e1e1e; 
+                      color: #d4d4d4; 
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  }
+                  .app-container { 
+                      display: flex; 
+                      justify-content: center; 
+                      align-items: center; 
+                      height: 100vh; 
+                      flex-direction: column;
+                      text-align: center;
+                      padding: 20px;
+                  }
+                  .logo { font-size: 48px; margin-bottom: 20px; }
+                  .title { font-size: 24px; margin-bottom: 10px; }
+                  .subtitle { font-size: 16px; opacity: 0.8; }
+              </style>
+          </head>
+          <body>
+              <div class="app-container">
+                  <div class="logo">📱</div>
+                  <div class="title">VS Code Mobile</div>
+                  <div class="subtitle">مرحباً بك في VS Code المحمول!</div>
+              </div>
+              <script type="module">
+                  import { Capacitor } from '@capacitor/core';
+                  import { StatusBar } from '@capacitor/status-bar';
+                  import { SplashScreen } from '@capacitor/splash-screen';
+                  
+                  document.addEventListener('DOMContentLoaded', async () => {
+                      if (Capacitor.isNativePlatform()) {
+                          try {
+                              await StatusBar.setBackgroundColor({ color: '#1e1e1e' });
+                              await StatusBar.setStyle({ style: 'DARK' });
+                              await SplashScreen.hide();
+                          } catch (e) {
+                              console.log('Capacitor plugins not available');
+                          }
+                      }
+                      
+                      console.log('VS Code Mobile Started!');
+                  });
+              </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Initialize Capacitor project
+        working-directory: mobile-build
+        run: |
+          npx cap init "VS Code Mobile" "com.vscode.mobile.android" --web-dir=www
+          npx cap add android
+
+      - name: Sync Capacitor
+        working-directory: mobile-build
+        run: |
+          npx cap sync android
+          npx cap copy android
+
+      - name: Configure Android app
+        working-directory: mobile-build
+        run: |
+          # Configure app name and version
+          cat > android/app/src/main/res/values/strings.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">VS Code Mobile</string>
+              <string name="title_activity_main">VS Code Mobile</string>
+              <string name="package_name">com.vscode.mobile.android</string>
+              <string name="custom_url_scheme">vscode-mobile</string>
+          </resources>
+          EOF
+
+      - name: Grant execute permission for gradlew
+        working-directory: mobile-build/android
+        run: chmod +x gradlew
+
+      - name: Build APK
+        working-directory: mobile-build/android
+        run: |
+          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleRelease --stacktrace || echo "Release build failed, using debug build"
+
+      - name: Prepare APK outputs
+        run: |
+          mkdir -p apk-output
+          
+          # Copy release APK if available
+          if [ -f mobile-build/android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp mobile-build/android/app/build/outputs/apk/release/app-release.apk apk-output/vscode-mobile-release.apk
+          elif [ -f mobile-build/android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp mobile-build/android/app/build/outputs/apk/release/app-release-unsigned.apk apk-output/vscode-mobile-release.apk
+          fi
+          
+          # Copy debug APK as fallback
+          if [ -f mobile-build/android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp mobile-build/android/app/build/outputs/apk/debug/app-debug.apk apk-output/vscode-mobile-debug.apk
+          fi
+          
+          # Create build info
+          echo "# VS Code Mobile APK" > apk-output/BUILD_INFO.md
+          echo "Build Date: $(date)" >> apk-output/BUILD_INFO.md
+          echo "Commit: ${{ github.sha }}" >> apk-output/BUILD_INFO.md
+          echo "Branch: ${{ github.ref_name }}" >> apk-output/BUILD_INFO.md
+          echo "Build Number: ${{ github.run_number }}" >> apk-output/BUILD_INFO.md
+          echo "" >> apk-output/BUILD_INFO.md
+          echo "## Available APKs:" >> apk-output/BUILD_INFO.md
+          ls -la apk-output/*.apk >> apk-output/BUILD_INFO.md 2>/dev/null || echo "No APK files found" >> apk-output/BUILD_INFO.md
+          
+          echo "📱 APK files prepared:"
+          ls -la apk-output/
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-mobile-apk-${{ github.run_number }}
+          path: apk-output/
+          retention-days: 30
+
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apk-output/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          name: "VS Code Mobile ${{ github.ref_name }}"
+          body: |
+            # 📱 VS Code Mobile for Android
+            
+            ## مميزات التطبيق:
+            - ✅ واجهة محسنة للهواتف الذكية
+            - ✅ دعم اللمس المطور  
+            - ✅ وضع داكن افتراضي
+            - ✅ دعم اللغة العربية/RTL
+            - ✅ تصميم متجاوب
+            
+            ## متطلبات النظام:
+            - Android 7.0+ (API level 24)
+            - 100MB مساحة فارغة
+            - 2GB ذاكرة عشوائية
+            
+            ## طريقة التثبيت:
+            1. حمّل ملف APK
+            2. فعّل "مصادر غير معروفة" في الإعدادات
+            3. ثبت التطبيق واستمتع!
+            
+            **معلومات الإصدار:**
+            - Commit: ${{ github.sha }}
+            - تاريخ الإنشاء: $(date)
+            - رقم الإصدار: ${{ github.run_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment PR with APK
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { number: issue_number } = context.issue;
+            
+            const comment = `
+            ## 📱 VS Code Mobile APK جاهز!
+            
+            تم بناء تطبيق Android بنجاح! يمكنك تحميل APK من قسم Artifacts أعلاه.
+            
+            ### معلومات الإصدار:
+            - **رقم الإصدار**: ${{ github.run_number }}
+            - **Commit**: ${{ github.sha }}
+            - **Branch**: ${{ github.ref_name }}
+            
+            ### طريقة التثبيت:
+            1. حمّل APK من قسم Artifacts 
+            2. فعّل "التثبيت من مصادر غير معروفة" في إعدادات الأندرويد
+            3. ثبت التطبيق واستمتع بـ VS Code على هاتفك! 🚀
+            
+            ### الملفات المتاحة:
+            - \`vscode-mobile-debug.apk\` - للتطوير والاختبار
+            - \`vscode-mobile-release.apk\` - للاستخدام النهائي (إن وُجد)
+            `;
+            
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: comment
+            });

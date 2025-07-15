@@ -1,0 +1,63 @@
+{
+  "name": "vscode-mobile-android",
+  "version": "1.0.0",
+  "description": "VS Code Mobile Application for Android",
+  "main": "index.js",
+  "scripts": {
+    "android:build": "ionic capacitor build android --prod",
+    "android:run": "ionic capacitor run android",
+    "android:open": "ionic capacitor open android",
+    "android:sync": "ionic capacitor sync android",
+    "build": "npm run compile && npm run android:sync",
+    "compile": "cd .. && npm run compile",
+    "capacitor:add": "ionic capacitor add android",
+    "capacitor:sync": "ionic capacitor sync",
+    "capacitor:open": "ionic capacitor open android",
+    "release:build": "ionic capacitor build android --prod --release",
+    "install:deps": "npm install && ionic capacitor add android"
+  },
+  "keywords": [
+    "vscode",
+    "android",
+    "mobile",
+    "capacitor",
+    "ionic"
+  ],
+  "author": "VS Code Mobile Team",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^5.5.1",
+    "@capacitor/app": "^5.0.6",
+    "@capacitor/cli": "^5.5.1",
+    "@capacitor/core": "^5.5.1",
+    "@capacitor/device": "^5.0.6",
+    "@capacitor/filesystem": "^5.1.4",
+    "@capacitor/haptics": "^5.0.6",
+    "@capacitor/keyboard": "^5.0.6",
+    "@capacitor/network": "^5.0.6",
+    "@capacitor/splash-screen": "^5.0.6",
+    "@capacitor/status-bar": "^5.0.6",
+    "@capacitor/clipboard": "^5.0.6",
+    "@ionic/cli": "^7.1.1"
+  },
+  "devDependencies": {
+    "@ionic/angular-toolkit": "^9.0.0",
+    "typescript": "^5.2.2"
+  },
+  "capacitor": {
+    "appId": "com.vscode.mobile.android",
+    "appName": "VS Code Mobile",
+    "bundledWebRuntime": false,
+    "webDir": "out",
+    "plugins": {
+      "@capacitor/splash-screen": {},
+      "@capacitor/status-bar": {},
+      "@capacitor/keyboard": {},
+      "@capacitor/haptics": {},
+      "@capacitor/filesystem": {},
+      "@capacitor/device": {},
+      "@capacitor/network": {},
+      "@capacitor/clipboard": {}
+    }
+  }
+}
