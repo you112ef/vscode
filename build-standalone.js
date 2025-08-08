@@ -26,6 +26,24 @@ function error(message) {
   console.log(`[ERROR] ${message}`);
 }
 
+function copyFileSafe(source, target) {
+  try {
+    if (fs.existsSync(source)) {
+      // Ensure target directory exists
+      const targetDir = path.dirname(target);
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      fs.copyFileSync(source, target);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    log(`Failed to copy ${source}: ${err.message}`);
+    return false;
+  }
+}
+
 try {
   // Create out-build directory
   if (!fs.existsSync('out-build')) {
@@ -50,14 +68,19 @@ try {
     '_redirects'
   ];
 
+  let copiedFiles = 0;
   staticFiles.forEach(file => {
-    if (fs.existsSync(file)) {
-      fs.copyFileSync(file, path.join('out-build', file));
+    if (copyFileSafe(file, path.join('out-build', file))) {
       success(`${file} copied`);
+      copiedFiles++;
     } else {
       log(`${file} not found, skipping...`);
     }
   });
+
+  if (copiedFiles === 0) {
+    throw new Error('No essential files found to copy');
+  }
 
   // Create basic robots.txt
   const robotsContent = `User-agent: *
@@ -105,7 +128,7 @@ success('Created minimal loader.js');
 // Create a minimal workbench main file
 const workbenchContent = `// Minimal VS Code Web Workbench
 console.log('VS Code Web Workbench initialized');
-document.getElementById('vscode-workbench').innerHTML = '<div style="padding: 20px; text-align: center;"><h1>VS Code Web</h1><p>Loading...</p></div>';`;
+document.getElementById('vscode-workbench').innerHTML = '<div style="padding: 20px; text-align: center; color: #cccccc; background: #1e1e1e; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;"><h1 style="color: #007acc; margin-bottom: 20px;">VS Code Web</h1><p>Loading VS Code Web Editor...</p><div style="margin-top: 20px; width: 40px; height: 40px; border: 3px solid #333; border-top: 3px solid #007acc; border-radius: 50%; animation: spin 1s linear infinite;"></div><style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style></div>';`;
 fs.writeFileSync(path.join('out-build', 'vs', 'workbench', 'workbench.web.main.js'), workbenchContent);
 success('Created minimal workbench.web.main.js');
 
@@ -116,11 +139,11 @@ const cssFiles = [
   'src/vs/workbench/browser/media/responsive-optimized.css'
 ];
 
+let cssCopied = 0;
 cssFiles.forEach(cssFile => {
-  if (fs.existsSync(cssFile)) {
-    const targetPath = path.join('out-build', 'vs', 'workbench', 'browser', 'media', path.basename(cssFile));
-    fs.copyFileSync(cssFile, targetPath);
+  if (copyFileSafe(cssFile, path.join('out-build', 'vs', 'workbench', 'browser', 'media', path.basename(cssFile)))) {
     success(`${path.basename(cssFile)} copied`);
+    cssCopied++;
   }
 });
 
@@ -131,16 +154,16 @@ const iconFiles = [
   'resources/linux/code.png'
 ];
 
+let iconsCopied = 0;
 iconFiles.forEach(iconFile => {
-  if (fs.existsSync(iconFile)) {
-    const targetPath = path.join('out-build', 'vs', 'workbench', 'browser', 'media', path.basename(iconFile));
-    fs.copyFileSync(iconFile, targetPath);
+  if (copyFileSafe(iconFile, path.join('out-build', 'vs', 'workbench', 'browser', 'media', path.basename(iconFile)))) {
     success(`${path.basename(iconFile)} copied`);
+    iconsCopied++;
   }
 });
 
 // Create a simple placeholder icon if none exists
-if (!fs.existsSync(path.join('out-build', 'vs', 'workbench', 'browser', 'media', 'code-icon.svg'))) {
+if (iconsCopied === 0) {
   const iconContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#007acc">
   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
 </svg>`;
@@ -175,11 +198,21 @@ if (fs.existsSync('out-build')) {
   }
   
   listFiles('out-build');
+  
+  // Summary
+  console.log('');
+  console.log('📊 Build Summary:');
+  console.log(`  • Static files: ${copiedFiles}/${staticFiles.length}`);
+  console.log(`  • CSS files: ${cssCopied}/${cssFiles.length}`);
+  console.log(`  • Icon files: ${iconsCopied}/${iconFiles.length}`);
+  console.log(`  • Total files: ${files.length} in root + subdirectories`);
+  
 } else {
   throw new Error('No build output generated');
 }
 
 } catch (err) {
   error(`Build failed: ${err.message}`);
+  console.error('Stack trace:', err.stack);
   process.exit(1);
 }
