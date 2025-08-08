@@ -1,0 +1,29 @@
+{
+  "name": "vscode-web-cloudflare",
+  "version": "1.0.0",
+  "description": "VS Code Web optimized for Cloudflare Pages",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node build-simple.js",
+    "compile-web": "node ./node_modules/gulp/bin/gulp.js compile-web"
+  },
+  "dependencies": {
+    "gulp": "^4.0.2",
+    "typescript": "^5.9.2",
+    "esbuild": "^0.20.0",
+    "rollup": "^4.0.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "terser": "^5.0.0",
+    "cssnano": "^6.0.0",
+    "autoprefixer": "^10.0.0",
+    "postcss": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
