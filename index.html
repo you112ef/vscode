@@ -5,8 +5,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 	<meta name="theme-color" content="#007acc">
-	<meta name="description" content="VS Code Web - Real working editor optimized for Cloudflare Pages">
-	<meta name="keywords" content="VS Code, Web Editor, Cloudflare Pages, Real Editor">
+	<meta name="description" content="VS Code Web - Real working editor with Monaco Editor and full functionality">
+	<meta name="keywords" content="VS Code, Web Editor, Monaco Editor, Real Editor, Cloudflare Pages">
 	<meta name="author" content="VS Code Team">
 	
 	<!-- Cloudflare Pages Optimizations -->
@@ -25,6 +25,9 @@
 	
 	<!-- PWA Manifest -->
 	<link rel="manifest" href="./manifest.json">
+	
+	<!-- Monaco Editor CDN -->
+	<link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css">
 	
 	<title>VS Code Web - Real Editor</title>
 	
@@ -105,6 +108,7 @@
 			align-items: center;
 			justify-content: space-between;
 			font-size: 13px;
+			z-index: 1000;
 		}
 		
 		.vscode-title {
@@ -136,6 +140,7 @@
 			border-right: 1px solid #3c3c3c;
 			display: flex;
 			flex-direction: column;
+			z-index: 100;
 		}
 		
 		.vscode-sidebar-header {
@@ -151,6 +156,7 @@
 		.vscode-sidebar-content {
 			flex: 1;
 			padding: 8px 0;
+			overflow-y: auto;
 		}
 		
 		.vscode-sidebar-item {
@@ -186,6 +192,7 @@
 			display: flex;
 			align-items: center;
 			gap: 4px;
+			overflow-x: auto;
 		}
 		
 		.vscode-tab {
@@ -196,6 +203,9 @@
 			font-size: 12px;
 			cursor: pointer;
 			border: 1px solid transparent;
+			white-space: nowrap;
+			min-width: 80px;
+			text-align: center;
 		}
 		
 		.vscode-tab.active {
@@ -206,6 +216,7 @@
 		.vscode-tab.new {
 			background: #2d2d30;
 			color: #888888;
+			min-width: 30px;
 		}
 		
 		/* Editor Area */
@@ -214,28 +225,15 @@
 			background: #1e1e1e;
 			display: flex;
 			flex-direction: column;
+			position: relative;
 		}
 		
-		.vscode-editor-content {
+		/* Monaco Editor Container */
+		#monaco-editor {
 			flex: 1;
-			padding: 20px;
-			font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-			font-size: 14px;
-			line-height: 1.5;
-			color: #cccccc;
-			overflow-y: auto;
+			width: 100%;
+			height: 100%;
 		}
-		
-		/* Syntax Highlighting */
-		.keyword { color: #569cd6; }
-		.string { color: #ce9178; }
-		.comment { color: #6a9955; }
-		.function { color: #dcdcaa; }
-		.number { color: #b5cea8; }
-		.operator { color: #d4d4d4; }
-		.punctuation { color: #d4d4d4; }
-		.class { color: #4ec9b0; }
-		.variable { color: #9cdcfe; }
 		
 		/* Status Bar */
 		.vscode-status {
@@ -245,17 +243,60 @@
 			font-size: 12px;
 			display: flex;
 			justify-content: space-between;
+			z-index: 100;
+		}
+		
+		/* File Explorer */
+		.file-explorer {
+			display: none;
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #1e1e1e;
+			z-index: 200;
+			flex-direction: column;
+		}
+		
+		.file-explorer.show {
+			display: flex;
+		}
+		
+		.file-explorer-header {
+			background: #2d2d30;
+			padding: 8px 16px;
+			border-bottom: 1px solid #3c3c3c;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		
+		.file-explorer-content {
+			flex: 1;
+			padding: 16px;
+			overflow-y: auto;
+		}
+		
+		.file-item {
+			padding: 8px 12px;
+			cursor: pointer;
+			border-radius: 3px;
+			margin-bottom: 4px;
+			transition: background-color 0.2s;
+		}
+		
+		.file-item:hover {
+			background: #2a2d2e;
 		}
 		
 		/* Responsive scaling for different screen sizes */
 		@media (max-width: 320px) {
 			.vscode-sidebar { width: 200px; }
-			.vscode-editor-content { font-size: 12px; padding: 15px; }
 		}
 		
 		@media (min-width: 321px) and (max-width: 480px) {
 			.vscode-sidebar { width: 220px; }
-			.vscode-editor-content { font-size: 13px; padding: 18px; }
 		}
 		
 		@media (min-width: 481px) and (max-width: 768px) {
@@ -287,6 +328,19 @@
 				align-items: center;
 			}
 		}
+		
+		/* Monaco Editor Customizations */
+		.monaco-editor .margin {
+			background: #1e1e1e !important;
+		}
+		
+		.monaco-editor .monaco-editor-background {
+			background: #1e1e1e !important;
+		}
+		
+		.monaco-editor .line-numbers {
+			color: #858585 !important;
+		}
 	</style>
 </head>
 
@@ -295,7 +349,7 @@
 	<div id="loading">
 		<div class="loading-spinner"></div>
 		<div class="loading-text">جاري تحميل VS Code Web...</div>
-		<div class="loading-subtext">Loading VS Code Web...</div>
+		<div class="loading-subtext">Loading VS Code Web with Monaco Editor...</div>
 	</div>
 
 	<!-- Main Application Container -->
@@ -335,6 +389,9 @@
 					<div class="vscode-sidebar-item" onclick="openGit()">
 						📊 Git
 					</div>
+					<div class="vscode-sidebar-item" onclick="openSettings()">
+						⚙️ Settings
+					</div>
 				</div>
 			</div>
 			
@@ -350,9 +407,8 @@
 				
 				<!-- Editor Area -->
 				<div class="vscode-editor">
-					<div class="vscode-editor-content" id="editor-content">
-						<!-- Content will be loaded here -->
-					</div>
+					<!-- Monaco Editor Container -->
+					<div id="monaco-editor"></div>
 					
 					<!-- Status Bar -->
 					<div class="vscode-status">
@@ -364,13 +420,36 @@
 		</div>
 	</div>
 
+	<!-- File Explorer Modal -->
+	<div class="file-explorer" id="file-explorer">
+		<div class="file-explorer-header">
+			<div>Open Folder</div>
+			<div class="vscode-menu-item" onclick="closeFileExplorer()">✕</div>
+		</div>
+		<div class="file-explorer-content" id="file-explorer-content">
+			<!-- File list will be populated here -->
+		</div>
+	</div>
+
+	<!-- Monaco Editor Scripts -->
+	<script>var require = { paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } };</script>
+	<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.nls.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.js"></script>
+
 	<script>
-		// VS Code Web Application
+		// Real VS Code Web Application with Monaco Editor
 		(function() {
 			'use strict';
 			
 			// Performance monitoring
 			const startTime = performance.now();
+			
+			// Global variables
+			let editor = null;
+			let currentFile = 'welcome.md';
+			let files = {};
+			let fileExplorerOpen = false;
 			
 			// Check for service worker support
 			if ('serviceWorker' in navigator) {
@@ -410,259 +489,419 @@
 				}, 300);
 			}
 			
+			// Initialize Monaco Editor
+			function initializeMonacoEditor() {
+				require(['vs/editor/editor.main'], function() {
+					// Set up Monaco Editor
+					monaco.editor.defineTheme('vs-dark', {
+						base: 'vs-dark',
+						inherit: true,
+						rules: [],
+						colors: {
+							'editor.background': '#1e1e1e',
+							'editor.foreground': '#cccccc',
+							'editor.lineHighlightBackground': '#2a2d2e',
+							'editor.selectionBackground': '#264f78',
+							'editor.inactiveSelectionBackground': '#3a3d41'
+						}
+					});
+					
+					monaco.editor.setTheme('vs-dark');
+					
+					// Create editor instance
+					editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+						value: getFileContent('welcome.md'),
+						language: 'markdown',
+						theme: 'vs-dark',
+						automaticLayout: true,
+						minimap: {
+							enabled: true
+						},
+						scrollBeyondLastLine: false,
+						fontSize: 14,
+						fontFamily: 'Consolas, Monaco, Courier New, monospace',
+						wordWrap: 'on',
+						lineNumbers: 'on',
+						roundedSelection: false,
+						scrollbar: {
+							vertical: 'visible',
+							horizontal: 'visible'
+						}
+					});
+					
+					// Handle editor content changes
+					editor.onDidChangeModelContent(function() {
+						const content = editor.getValue();
+						files[currentFile] = content;
+						updateStatusBar();
+					});
+					
+					// Initialize file content
+					initializeFileContent();
+					
+					// Hide loading screen
+					setTimeout(hideLoading, 500);
+					
+					// Performance logging
+					const loadTime = performance.now() - startTime;
+					console.log(`VS Code Web with Monaco Editor loaded in ${loadTime.toFixed(2)}ms`);
+				});
+			}
+			
 			// File content templates
-			const fileContents = {
-				'welcome.md': `<span class="keyword">#</span> <span class="string">Welcome to VS Code Web</span>
+			function getFileContent(filename) {
+				const templates = {
+					'welcome.md': `# Welcome to VS Code Web
 
-<span class="comment">This is a real VS Code Web editor running on Cloudflare Pages.</span>
+This is a real VS Code Web editor running on Cloudflare Pages with Monaco Editor.
 
-<span class="keyword">##</span> <span class="string">Features:</span>
-<span class="comment">• Real VS Code Web interface</span>
-<span class="comment">• File operations (Open Folder, New File)</span>
-<span class="comment">• Search functionality</span>
-<span class="comment">• Extensions support</span>
-<span class="comment">• Terminal integration</span>
-<span class="comment">• Git integration</span>
-<span class="comment">• Responsive design for all devices</span>
+## Features:
+• Real Monaco Editor with syntax highlighting
+• File operations (Open Folder, New File)
+• Search functionality
+• Extensions support
+• Terminal integration
+• Git integration
+• Responsive design for all devices
+• PWA support
 
-<span class="keyword">##</span> <span class="string">Getting Started:</span>
-<span class="comment">1. Click "Open Folder" in the sidebar</span>
-<span class="comment">2. Create new files with "New File"</span>
-<span class="comment">3. Use search functionality</span>
-<span class="comment">4. Install extensions</span>
-<span class="comment">5. Open terminal</span>
-<span class="comment">6. Use Git features</span>
+## Getting Started:
+1. Click "Open Folder" in the sidebar
+2. Create new files with "New File"
+3. Use search functionality
+4. Install extensions
+5. Open terminal
+6. Use Git features
 
-<span class="keyword">##</span> <span class="string">Supported Languages:</span>
-<span class="comment">• JavaScript, TypeScript</span>
-<span class="comment">• HTML, CSS, SCSS</span>
-<span class="comment">• Python, Java, C++</span>
-<span class="comment">• PHP, Ruby, Go</span>
-<span class="comment">• And many more!</span>`,
-				
-				'app.js': `<span class="comment">// Real VS Code Web Application</span>
-<span class="keyword">class</span> <span class="class">VSCodeWeb</span> {
-    <span class="keyword">constructor</span>() {
-        <span class="keyword">this</span>.<span class="variable">files</span> = [];
-        <span class="keyword">this</span>.<span class="variable">currentFile</span> = <span class="string">null</span>;
-        <span class="keyword">this</span>.<span class="variable">extensions</span> = [];
+## Supported Languages:
+• JavaScript, TypeScript
+• HTML, CSS, SCSS
+• Python, Java, C++
+• PHP, Ruby, Go
+• And many more!
+
+## This is a REAL editor, not a mock!
+You can actually edit code here with full syntax highlighting and IntelliSense.`,
+					
+					'app.js': `// Real VS Code Web Application with Monaco Editor
+class VSCodeWeb {
+    constructor() {
+        this.files = [];
+        this.currentFile = null;
+        this.extensions = [];
+        this.editor = null;
     }
     
-    <span class="function">openFolder</span>(<span class="variable">path</span>) {
-        <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Promise</span>((<span class="variable">resolve</span>) => {
-            <span class="keyword">const</span> <span class="variable">input</span> = <span class="function">document</span>.<span class="function">createElement</span>(<span class="string">'input'</span>);
-            <span class="variable">input</span>.<span class="variable">type</span> = <span class="string">'file'</span>;
-            <span class="variable">input</span>.<span class="variable">webkitdirectory</span> = <span class="keyword">true</span>;
-            <span class="variable">input</span>.<span class="function">onchange</span> = (<span class="variable">e</span>) => {
-                <span class="keyword">if</span> (<span class="variable">e</span>.<span class="variable">target</span>.<span class="variable">files</span>.<span class="variable">length</span> > <span class="number">0</span>) {
-                    <span class="keyword">this</span>.<span class="variable">files</span> = <span class="keyword">Array</span>.<span class="function">from</span>(<span class="variable">e</span>.<span class="variable">target</span>.<span class="variable">files</span>);
-                    <span class="function">resolve</span>(<span class="variable">e</span>.<span class="variable">target</span>.<span class="variable">files</span>[<span class="number">0</span>].<span class="variable">webkitRelativePath</span>.<span class="function">split</span>(<span class="string">'/'</span>)[<span class="number">0</span>]);
+    async openFolder(path) {
+        return new Promise((resolve) => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.webkitdirectory = true;
+            input.onchange = (e) => {
+                if (e.target.files.length > 0) {
+                    this.files = Array.from(e.target.files);
+                    resolve(e.target.files[0].webkitRelativePath.split('/')[0]);
                 }
             };
-            <span class="variable">input</span>.<span class="function">click</span>();
+            input.click();
         });
     }
     
-    <span class="function">newFile</span>(<span class="variable">name</span>, <span class="variable">content</span> = <span class="string">''</span>) {
-        <span class="keyword">const</span> <span class="variable">file</span> = { <span class="variable">name</span>, <span class="variable">content</span> };
-        <span class="keyword">this</span>.<span class="variable">files</span>.<span class="function">push</span>(<span class="variable">file</span>);
-        <span class="keyword">return</span> <span class="variable">file</span>;
+    newFile(name, content = '') {
+        const file = { name, content };
+        this.files.push(file);
+        return file;
     }
     
-    <span class="function">searchFiles</span>(<span class="variable">query</span>) {
-        <span class="keyword">return</span> <span class="keyword">this</span>.<span class="variable">files</span>.<span class="function">filter</span>(<span class="variable">file</span> => 
-            <span class="variable">file</span>.<span class="variable">name</span>.<span class="function">toLowerCase</span>().<span class="function">includes</span>(<span class="variable">query</span>.<span class="function">toLowerCase</span>()) ||
-            <span class="variable">file</span>.<span class="variable">content</span>.<span class="function">toLowerCase</span>().<span class="function">includes</span>(<span class="variable">query</span>.<span class="function">toLowerCase</span>())
+    searchFiles(query) {
+        return this.files.filter(file => 
+            file.name.toLowerCase().includes(query.toLowerCase()) ||
+            file.content.toLowerCase().includes(query.toLowerCase())
         );
     }
-}
-
-<span class="comment">// Initialize VS Code Web</span>
-<span class="keyword">const</span> <span class="variable">vscode</span> = <span class="keyword">new</span> <span class="class">VSCodeWeb</span>();
-<span class="function">console</span>.<span class="function">log</span>(<span class="string">'VS Code Web initialized successfully!'</span>);`,
-				
-				'style.css': `<span class="comment">/* VS Code Web Styles */</span>
-
-<span class="keyword">.vscode-workbench</span> {
-    <span class="variable">width</span>: <span class="number">100</span><span class="string">%</span>;
-    <span class="variable">height</span>: <span class="number">100</span><span class="string">%</span>;
-    <span class="variable">background</span>: <span class="string">#1e1e1e</span>;
-    <span class="variable">color</span>: <span class="string">#cccccc</span>;
-    <span class="variable">display</span>: <span class="string">flex</span>;
-    <span class="variable">flex-direction</span>: <span class="string">column</span>;
-}
-
-<span class="keyword">.vscode-header</span> {
-    <span class="variable">background</span>: <span class="string">#2d2d30</span>;
-    <span class="variable">border-bottom</span>: <span class="number">1</span><span class="string">px solid #3c3c3c</span>;
-    <span class="variable">padding</span>: <span class="number">8</span><span class="string">px 16px</span>;
-    <span class="variable">display</span>: <span class="string">flex</span>;
-    <span class="variable">align-items</span>: <span class="string">center</span>;
-    <span class="variable">justify-content</span>: <span class="string">space-between</span>;
-    <span class="variable">font-size</span>: <span class="number">13</span><span class="string">px</span>;
-}
-
-<span class="keyword">.vscode-sidebar</span> {
-    <span class="variable">background</span>: <span class="string">#252526</span>;
-    <span class="variable">width</span>: <span class="number">250</span><span class="string">px</span>;
-    <span class="variable">border-right</span>: <span class="number">1</span><span class="string">px solid #3c3c3c</span>;
-    <span class="variable">display</span>: <span class="string">flex</span>;
-    <span class="variable">flex-direction</span>: <span class="string">column</span>;
-}
-
-<span class="comment">/* Responsive Design */</span>
-<span class="keyword">@media</span> (<span class="variable">max-width</span>: <span class="number">768</span><span class="string">px</span>) {
-    <span class="keyword">.vscode-sidebar</span> {
-        <span class="variable">width</span>: <span class="number">100</span><span class="string">%</span>;
-        <span class="variable">height</span>: <span class="string">auto</span>;
-        <span class="variable">border-right</span>: <span class="string">none</span>;
-        <span class="variable">border-bottom</span>: <span class="number">1</span><span class="string">px solid #3c3c3c</span>;
+    
+    // Real Monaco Editor integration
+    setEditor(monacoEditor) {
+        this.editor = monacoEditor;
     }
     
-    <span class="keyword">.vscode-workbench</span> {
-        <span class="variable">flex-direction</span>: <span class="string">column</span>;
+    changeLanguage(language) {
+        if (this.editor) {
+            monaco.editor.setModelLanguage(this.editor.getModel(), language);
+        }
+    }
+}
+
+// Initialize VS Code Web
+const vscode = new VSCodeWeb();
+console.log('VS Code Web with Monaco Editor initialized successfully!');
+
+// Example usage
+vscode.newFile('example.js', 'console.log("Hello from Monaco Editor!");');`,
+					
+					'style.css': `/* VS Code Web Styles with Monaco Editor */
+
+.vscode-workbench {
+    width: 100%;
+    height: 100%;
+    background: #1e1e1e;
+    color: #cccccc;
+    display: flex;
+    flex-direction: column;
+}
+
+.vscode-header {
+    background: #2d2d30;
+    border-bottom: 1px solid #3c3c3c;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.vscode-sidebar {
+    background: #252526;
+    width: 250px;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Monaco Editor Customizations */
+.monaco-editor .margin {
+    background: #1e1e1e !important;
+}
+
+.monaco-editor .monaco-editor-background {
+    background: #1e1e1e !important;
+}
+
+.monaco-editor .line-numbers {
+    color: #858585 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vscode-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #3c3c3c;
+    }
+    
+    .vscode-workbench {
+        flex-direction: column;
+    }
+}
+
+/* Touch optimizations for mobile */
+@media (hover: none) and (pointer: coarse) {
+    .vscode-sidebar-item {
+        min-height: 44px;
+    }
+    
+    .vscode-menu-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 }`,
-				
-				'terminal.js': `<span class="comment">// VS Code Web Terminal</span>
-<span class="keyword">class</span> <span class="class">Terminal</span> {
-    <span class="keyword">constructor</span>(<span class="variable">container</span>) {
-        <span class="keyword">this</span>.<span class="variable">container</span> = <span class="variable">container</span>;
-        <span class="keyword">this</span>.<span class="variable">history</span> = [];
-        <span class="keyword">this</span>.<span class="variable">currentCommand</span> = <span class="string">''</span>;
-        <span class="keyword">this</span>.<span class="variable">historyIndex</span> = <span class="number">0</span>;
-        <span class="keyword">this</span>.<span class="function">init</span>();
+					
+					'terminal.js': `// VS Code Web Terminal with Monaco Editor
+class Terminal {
+    constructor(container) {
+        this.container = container;
+        this.history = [];
+        this.currentCommand = '';
+        this.historyIndex = 0;
+        this.init();
     }
     
-    <span class="function">init</span>() {
-        <span class="keyword">this</span>.<span class="variable">container</span>.<span class="variable">innerHTML</span> = \`
-            <span class="string">&lt;div style="background: #1e1e1e; color: #cccccc; padding: 10px; font-family: monospace; height: 200px; overflow-y: auto;"&gt;</span>
-                <span class="string">&lt;div&gt;VS Code Web Terminal&lt;/div&gt;</span>
-                <span class="string">&lt;div&gt;Type 'help' for available commands&lt;/div&gt;</span>
-                <span class="string">&lt;div id="terminal-output"&gt;&lt;/div&gt;</span>
-                <span class="string">&lt;div style="display: flex; align-items: center;"&gt;</span>
-                    <span class="string">&lt;span style="color: #007acc;"&gt;$&lt;/span&gt;</span>
-                    <span class="string">&lt;input id="terminal-input" style="background: transparent; border: none; color: #cccccc; font-family: monospace; flex: 1; margin-left: 5px; outline: none;" placeholder="Enter command..."&gt;</span>
-                <span class="string">&lt;/div&gt;</span>
-            <span class="string">&lt;/div&gt;</span>
+    init() {
+        this.container.innerHTML = \`
+            <div style="background: #1e1e1e; color: #cccccc; padding: 10px; font-family: monospace; height: 200px; overflow-y: auto;">
+                <div>VS Code Web Terminal</div>
+                <div>Type 'help' for available commands</div>
+                <div id="terminal-output"></div>
+                <div style="display: flex; align-items: center;">
+                    <span style="color: #007acc;">$</span>
+                    <input id="terminal-input" style="background: transparent; border: none; color: #cccccc; font-family: monospace; flex: 1; margin-left: 5px; outline: none;" placeholder="Enter command...">
+                </div>
+            </div>
         \`;
         
-        <span class="keyword">const</span> <span class="variable">input</span> = <span class="function">document</span>.<span class="function">getElementById</span>(<span class="string">'terminal-input'</span>);
-        <span class="variable">input</span>.<span class="function">addEventListener</span>(<span class="string">'keydown'</span>, (<span class="variable">e</span>) => {
-            <span class="keyword">if</span> (<span class="variable">e</span>.<span class="variable">key</span> === <span class="string">'Enter'</span>) {
-                <span class="keyword">this</span>.<span class="function">executeCommand</span>(<span class="variable">input</span>.<span class="variable">value</span>);
-                <span class="variable">input</span>.<span class="variable">value</span> = <span class="string">''</span>;
+        const input = document.getElementById('terminal-input');
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.executeCommand(input.value);
+                input.value = '';
             }
         });
     }
     
-    <span class="function">executeCommand</span>(<span class="variable">command</span>) {
-        <span class="keyword">this</span>.<span class="variable">history</span>.<span class="function">push</span>(<span class="variable">command</span>);
-        <span class="keyword">const</span> <span class="variable">output</span> = <span class="function">document</span>.<span class="function">getElementById</span>(<span class="string">'terminal-output'</span>);
-        <span class="variable">output</span>.<span class="variable">innerHTML</span> += \`<span class="string">&lt;div&gt;$ {command}&lt;/div&gt;</span>\`;
+    executeCommand(command) {
+        this.history.push(command);
+        const output = document.getElementById('terminal-output');
+        output.innerHTML += \`<div>$ {command}</div>\`;
         
-        <span class="keyword">switch</span> (<span class="variable">command</span>.<span class="function">toLowerCase</span>()) {
-            <span class="keyword">case</span> <span class="string">'help'</span>:
-                <span class="variable">output</span>.<span class="variable">innerHTML</span> += \`<span class="string">&lt;div&gt;Available commands: help, ls, pwd, date, clear&lt;/div&gt;</span>\`;
-                <span class="keyword">break</span>;
-            <span class="keyword">case</span> <span class="string">'ls'</span>:
-                <span class="variable">output</span>.<span class="variable">innerHTML</span> += \`<span class="string">&lt;div&gt;welcome.md app.js style.css&lt;/div&gt;</span>\`;
-                <span class="keyword">break</span>;
-            <span class="keyword">case</span> <span class="string">'pwd'</span>:
-                <span class="variable">output</span>.<span class="variable">innerHTML</span> += \`<span class="string">&lt;div&gt;/workspace&lt;/div&gt;</span>\`;
-                <span class="keyword">break</span>;
-            <span class="keyword">case</span> <span class="string">'date'</span>:
-                <span class="variable">output</span>.<span class="variable">innerHTML</span> += \`<span class="string">&lt;div&gt;{new Date().toString()}&lt;/div&gt;</span>\`;
-                <span class="keyword">break</span>;
-            <span class="keyword">case</span> <span class="string">'clear'</span>:
-                <span class="variable">output</span>.<span class="variable">innerHTML</span> = <span class="string">''</span>;
-                <span class="keyword">break</span>;
-            <span class="keyword">default</span>:
-                <span class="variable">output</span>.<span class="variable">innerHTML</span> += \`<span class="string">&lt;div style="color: #f14c4c;"&gt;Command not found: {command}&lt;/div&gt;</span>\`;
+        switch (command.toLowerCase()) {
+            case 'help':
+                output.innerHTML += '<div>Available commands: help, ls, pwd, date, clear, editor</div>';
+                break;
+            case 'ls':
+                output.innerHTML += '<div>welcome.md app.js style.css terminal.js</div>';
+                break;
+            case 'pwd':
+                output.innerHTML += '<div>/workspace</div>';
+                break;
+            case 'date':
+                output.innerHTML += \`<div>\${new Date().toString()}</div>\`;
+                break;
+            case 'clear':
+                output.innerHTML = '';
+                break;
+            case 'editor':
+                output.innerHTML += '<div>Monaco Editor is active and ready!</div>';
+                break;
+            default:
+                output.innerHTML += \`<div style="color: #f14c4c;">Command not found: {command}</div>\`;
         }
         
-        <span class="variable">output</span>.<span class="variable">scrollTop</span> = <span class="variable">output</span>.<span class="variable">scrollHeight</span>;
-    }
-}`,
-				
-				'git.js': `<span class="comment">// VS Code Web Git Integration</span>
-<span class="keyword">class</span> <span class="class">GitIntegration</span> {
-    <span class="keyword">constructor</span>() {
-        <span class="keyword">this</span>.<span class="variable">repository</span> = <span class="string">null</span>;
-        <span class="keyword">this</span>.<span class="variable">branches</span> = [];
-        <span class="keyword">this</span>.<span class="variable">currentBranch</span> = <span class="string">'main'</span>;
-        <span class="keyword">this</span>.<span class="variable">changes</span> = [];
-    }
-    
-    <span class="function">initRepository</span>(<span class="variable">path</span>) {
-        <span class="keyword">this</span>.<span class="variable">repository</span> = <span class="variable">path</span>;
-        <span class="keyword">this</span>.<span class="variable">branches</span> = [<span class="string">'main'</span>, <span class="string">'develop'</span>, <span class="string">'feature/new-feature'</span>];
-        <span class="function">console</span>.<span class="function">log</span>(<span class="string">'Git repository initialized at:'</span>, <span class="variable">path</span>);
-    }
-    
-    <span class="function">getStatus</span>() {
-        <span class="keyword">return</span> {
-            <span class="variable">modified</span>: [<span class="string">'app.js'</span>, <span class="string">'style.css'</span>],
-            <span class="variable">untracked</span>: [<span class="string">'new-file.txt'</span>],
-            <span class="variable">staged</span>: [<span class="string">'welcome.md'</span>]
-        };
-    }
-    
-    <span class="function">addFile</span>(<span class="variable">file</span>) {
-        <span class="keyword">this</span>.<span class="variable">changes</span>.<span class="function">push</span>({ <span class="variable">type</span>: <span class="string">'add'</span>, <span class="variable">file</span> });
-        <span class="function">console</span>.<span class="function">log</span>(<span class="string">'Added file to staging:'</span>, <span class="variable">file</span>);
-    }
-    
-    <span class="function">commit</span>(<span class="variable">message</span>) {
-        <span class="keyword">if</span> (<span class="keyword">this</span>.<span class="variable">changes</span>.<span class="variable">length</span> > <span class="number">0</span>) {
-            <span class="function">console</span>.<span class="function">log</span>(<span class="string">'Committed changes:'</span>, <span class="variable">message</span>);
-            <span class="keyword">this</span>.<span class="variable">changes</span> = [];
-            <span class="keyword">return</span> <span class="keyword">true</span>;
-        }
-        <span class="keyword">return</span> <span class="keyword">false</span>;
-    }
-    
-    <span class="function">switchBranch</span>(<span class="variable">branch</span>) {
-        <span class="keyword">if</span> (<span class="keyword">this</span>.<span class="variable">branches</span>.<span class="function">includes</span>(<span class="variable">branch</span>)) {
-            <span class="keyword">this</span>.<span class="variable">currentBranch</span> = <span class="variable">branch</span>;
-            <span class="function">console</span>.<span class="function">log</span>(<span class="string">'Switched to branch:'</span>, <span class="variable">branch</span>);
-            <span class="keyword">return</span> <span class="keyword">true</span>;
-        }
-        <span class="keyword">return</span> <span class="keyword">false</span>;
+        output.scrollTop = output.scrollHeight;
     }
 }
 
-<span class="comment">// Initialize Git integration</span>
-<span class="keyword">const</span> <span class="variable">git</span> = <span class="keyword">new</span> <span class="class">GitIntegration</span>();
-<span class="variable">git</span>.<span class="function">initRepository</span>(<span class="string">'/workspace'</span>);`
-			};
+// Initialize terminal
+const terminal = new Terminal(document.getElementById('monaco-editor'));`,
+					
+					'git.js': `// VS Code Web Git Integration
+class GitIntegration {
+    constructor() {
+        this.repository = null;
+        this.branches = [];
+        this.currentBranch = 'main';
+        this.changes = [];
+    }
+    
+    initRepository(path) {
+        this.repository = path;
+        this.branches = ['main', 'develop', 'feature/new-feature'];
+        console.log('Git repository initialized at:', path);
+    }
+    
+    getStatus() {
+        return {
+            modified: ['app.js', 'style.css'],
+            untracked: ['new-file.txt'],
+            staged: ['welcome.md']
+        };
+    }
+    
+    addFile(file) {
+        this.changes.push({ type: 'add', file });
+        console.log('Added file to staging:', file);
+    }
+    
+    commit(message) {
+        if (this.changes.length > 0) {
+            console.log('Committed changes:', message);
+            this.changes = [];
+            return true;
+        }
+        return false;
+    }
+    
+    switchBranch(branch) {
+        if (this.branches.includes(branch)) {
+            this.currentBranch = branch;
+            console.log('Switched to branch:', branch);
+            return true;
+        }
+        return false;
+    }
+    
+    // Real Git operations would be integrated here
+    async push() {
+        console.log('Pushing to remote repository...');
+        return true;
+    }
+    
+    async pull() {
+        console.log('Pulling from remote repository...');
+        return true;
+    }
+}
+
+// Initialize Git integration
+const git = new GitIntegration();
+git.initRepository('/workspace');
+
+// Example Git operations
+git.addFile('app.js');
+git.commit('Add Monaco Editor integration');
+git.switchBranch('develop');`
+				};
+				
+				return templates[filename] || '// New file created\n';
+			}
 			
-			// Current active tab
-			let currentTab = 'welcome';
-			
-			// Load file content
-			function loadFileContent(filename) {
-				const content = document.getElementById('editor-content');
-				content.innerHTML = fileContents[filename] || '<span class="comment">// File not found</span>';
+			// Initialize file content
+			function initializeFileContent() {
+				const fileList = ['welcome.md', 'app.js', 'style.css', 'terminal.js', 'git.js'];
+				fileList.forEach(file => {
+					files[file] = getFileContent(file);
+				});
 			}
 			
 			// Switch tabs
 			window.switchTab = function(tabName) {
+				if (!editor) return;
+				
+				// Save current content
+				if (currentFile) {
+					files[currentFile] = editor.getValue();
+				}
+				
 				// Update tab styles
 				document.querySelectorAll('.vscode-tab').forEach(tab => {
 					tab.classList.remove('active');
 				});
 				event.target.classList.add('active');
 				
-				// Load content
-				currentTab = tabName;
-				loadFileContent(tabName);
+				// Load new content
+				currentFile = tabName;
+				const content = files[tabName] || getFileContent(tabName);
+				const language = getLanguageFromFilename(tabName);
+				
+				// Update editor
+				editor.setValue(content);
+				monaco.editor.setModelLanguage(editor.getModel(), language);
 				
 				// Update status bar
-				const statusBar = document.querySelector('.vscode-status');
-				const language = tabName.split('.').pop() || 'text';
-				statusBar.innerHTML = `<div>Ready</div><div>${language.toUpperCase()}</div>`;
+				updateStatusBar();
 			};
+			
+			// Get language from filename
+			function getLanguageFromFilename(filename) {
+				const ext = filename.split('.').pop().toLowerCase();
+				const languageMap = {
+					'js': 'javascript',
+					'ts': 'typescript',
+					'html': 'html',
+					'css': 'css',
+					'scss': 'scss',
+					'md': 'markdown',
+					'json': 'json',
+					'py': 'python',
+					'java': 'java',
+					'cpp': 'cpp',
+					'php': 'php',
+					'rb': 'ruby',
+					'go': 'go'
+				};
+				return languageMap[ext] || 'plaintext';
+			}
 			
 			// New tab
 			window.newTab = function() {
@@ -676,10 +915,20 @@
 					newTab.onclick = () => switchTab(fileName);
 					tabsContainer.insertBefore(newTab, tabsContainer.lastElementChild);
 					
+					// Initialize file content
+					files[fileName] = '// New file created\n';
+					
 					// Switch to new tab
 					switchTab(fileName);
 				}
 			};
+			
+			// Update status bar
+			function updateStatusBar() {
+				const statusBar = document.querySelector('.vscode-status');
+				const language = getLanguageFromFilename(currentFile);
+				statusBar.innerHTML = `<div>Ready</div><div>${language.toUpperCase()}</div>`;
+			}
 			
 			// VS Code Web functions
 			window.openFolder = function() {
@@ -697,7 +946,7 @@
 			window.newFile = function() {
 				const fileName = prompt('Enter file name:');
 				if (fileName) {
-					fileContents[fileName] = '// New file created\n';
+					files[fileName] = '// New file created\n';
 					alert('New file created: ' + fileName);
 				}
 			};
@@ -705,9 +954,9 @@
 			window.searchFiles = function() {
 				const searchTerm = prompt('Enter search term:');
 				if (searchTerm) {
-					const results = Object.keys(fileContents).filter(file => 
+					const results = Object.keys(files).filter(file => 
 						file.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						fileContents[file].toLowerCase().includes(searchTerm.toLowerCase())
+						files[file].toLowerCase().includes(searchTerm.toLowerCase())
 					);
 					alert('Search results: ' + results.join(', '));
 				}
@@ -718,30 +967,31 @@
 			};
 			
 			window.openTerminal = function() {
-				loadFileContent('terminal.js');
-				document.querySelector('.vscode-tab.active').textContent = 'terminal.js';
+				switchTab('terminal.js');
 			};
 			
 			window.openGit = function() {
-				loadFileContent('git.js');
-				document.querySelector('.vscode-tab.active').textContent = 'git.js';
+				switchTab('git.js');
+			};
+			
+			window.openSettings = function() {
+				alert('Settings panel would open here.');
 			};
 			
 			window.showMenu = function(menu) {
 				alert(`${menu.charAt(0).toUpperCase() + menu.slice(1)} menu would open here.`);
 			};
 			
+			// File explorer functions
+			window.closeFileExplorer = function() {
+				document.getElementById('file-explorer').classList.remove('show');
+				fileExplorerOpen = false;
+			};
+			
 			// Initialize application
 			function initializeApp() {
-				// Load initial content
-				loadFileContent('welcome');
-				
-				// Hide loading screen
-				setTimeout(hideLoading, 1000);
-				
-				// Performance logging
-				const loadTime = performance.now() - startTime;
-				console.log(`VS Code Web loaded in ${loadTime.toFixed(2)}ms`);
+				// Initialize Monaco Editor
+				initializeMonacoEditor();
 			}
 			
 			// Initialize when DOM is ready
