@@ -1,0 +1,12 @@
+# Cloudflare Pages Configuration for VS Code Web
+# إعداد Cloudflare Pages لـ VS Code Web
+
+# Required for Cloudflare Pages
+pages_build_output_dir = "out-build"
+
+# Project name
+name = "vscode-web-optimized"
+
+# Compatibility settings
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
