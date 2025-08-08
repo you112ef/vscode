@@ -1,0 +1,24 @@
+name = "vscode-web-optimized"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run compile-web"
+watch_dir = "src"
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+name = "vscode-web-optimized-production"
+
+[env.staging]
+name = "vscode-web-optimized-staging"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[site]
+bucket = "./out-build"

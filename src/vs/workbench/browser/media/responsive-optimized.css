@@ -1,0 +1,453 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*
+ * VS Code Responsive Optimizations for Cloudflare Pages
+ * تحسينات VS Code المتجاوبة لنشر Cloudflare Pages
+ * Optimizations for all screen sizes and devices
+ */
+
+/* =========================== إعدادات عامة / General Settings =========================== */
+
+/* تحسين الأداء العام / General Performance Optimizations */
+.monaco-workbench {
+	/* تحسين العرض / Display optimizations */
+	contain: layout style paint;
+	will-change: transform;
+	
+	/* تحسين الخطوط / Font optimizations */
+	font-smooth: antialiased;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	
+	/* تحسين التمرير / Scroll optimizations */
+	scroll-behavior: smooth;
+	overscroll-behavior: contain;
+}
+
+/* =========================== تحسينات الهاتف المحمول / Mobile Optimizations =========================== */
+
+/* الهواتف الصغيرة (أقل من 480px) / Small phones (less than 480px) */
+@media (max-width: 480px) {
+	.monaco-workbench {
+		font-size: 12px !important;
+		transform: scale(0.65);
+		transform-origin: top left;
+		width: 153.846%; /* 100% / 0.65 */
+		height: 153.846%;
+	}
+	
+	/* تحسين الأزرار للهاتف / Button optimizations for phone */
+	.monaco-workbench .monaco-button,
+	.monaco-workbench .action-label,
+	.monaco-workbench button {
+		min-width: 44px !important; /* الحد الأدنى للمس / Minimum touch target */
+		min-height: 44px !important;
+		padding: 8px 12px !important;
+		font-size: 14px !important;
+		border-radius: 8px !important;
+		margin: 4px !important;
+	}
+	
+	/* تحسين الشريط الجانبي / Sidebar optimization */
+	.monaco-workbench .part.sidebar {
+		width: 100vw !important;
+		min-width: 100vw !important;
+		max-width: 100vw !important;
+		position: fixed !important;
+		z-index: 1000 !important;
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+	}
+	
+	.monaco-workbench .part.sidebar.visible {
+		transform: translateX(0);
+	}
+	
+	/* تحسين المحرر / Editor optimization */
+	.monaco-workbench .editor-container {
+		width: 100vw !important;
+		height: calc(100vh - 60px) !important;
+	}
+	
+	/* تحسين شريط العنوان / Title bar optimization */
+	.monaco-workbench .titlebar {
+		height: 50px !important;
+		min-height: 50px !important;
+	}
+	
+	/* تحسين القوائم / Menu optimization */
+	.monaco-workbench .monaco-list .monaco-list-row {
+		height: 36px !important;
+		min-height: 36px !important;
+		padding: 6px 8px !important;
+	}
+}
+
+/* الهواتف المتوسطة (480px - 768px) / Medium phones (480px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+	.monaco-workbench {
+		font-size: 13px !important;
+		transform: scale(0.75);
+		transform-origin: top left;
+		width: 133.333%; /* 100% / 0.75 */
+		height: 133.333%;
+	}
+	
+	/* تحسين الأزرار / Button optimizations */
+	.monaco-workbench .monaco-button,
+	.monaco-workbench .action-label,
+	.monaco-workbench button {
+		min-width: 40px !important;
+		min-height: 40px !important;
+		padding: 6px 10px !important;
+		font-size: 13px !important;
+		border-radius: 6px !important;
+		margin: 3px !important;
+	}
+	
+	/* تحسين الشريط الجانبي / Sidebar optimization */
+	.monaco-workbench .part.sidebar {
+		width: 25vw !important;
+		min-width: 180px !important;
+		max-width: 250px !important;
+	}
+}
+
+/* الأجهزة اللوحية (768px - 1024px) / Tablets (768px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+	.monaco-workbench {
+		font-size: 13px !important;
+		transform: scale(0.85);
+		transform-origin: top left;
+		width: 117.647%; /* 100% / 0.85 */
+		height: 117.647%;
+	}
+	
+	/* تحسين الأزرار / Button optimizations */
+	.monaco-workbench .monaco-button,
+	.monaco-workbench .action-label,
+	.monaco-workbench button {
+		min-width: 36px !important;
+		min-height: 36px !important;
+		padding: 5px 8px !important;
+		font-size: 12px !important;
+		border-radius: 5px !important;
+		margin: 2px !important;
+	}
+	
+	/* تحسين الشريط الجانبي / Sidebar optimization */
+	.monaco-workbench .part.sidebar {
+		width: 22vw !important;
+		min-width: 200px !important;
+		max-width: 280px !important;
+	}
+}
+
+/* الشاشات الكبيرة (أكبر من 1024px) / Large screens (greater than 1024px) */
+@media (min-width: 1025px) {
+	.monaco-workbench {
+		font-size: 13px !important;
+		transform: scale(0.9);
+		transform-origin: top left;
+		width: 111.111%; /* 100% / 0.9 */
+		height: 111.111%;
+	}
+	
+	/* تحسين الأزرار / Button optimizations */
+	.monaco-workbench .monaco-button,
+	.monaco-workbench .action-label,
+	.monaco-workbench button {
+		min-width: 32px !important;
+		min-height: 32px !important;
+		padding: 4px 6px !important;
+		font-size: 11px !important;
+		border-radius: 4px !important;
+		margin: 1px !important;
+	}
+	
+	/* تحسين الشريط الجانبي / Sidebar optimization */
+	.monaco-workbench .part.sidebar {
+		width: 20vw !important;
+		min-width: 220px !important;
+		max-width: 320px !important;
+	}
+}
+
+/* =========================== تحسينات الاتجاه / Orientation Optimizations =========================== */
+
+/* الوضع الأفقي / Landscape mode */
+@media (orientation: landscape) and (max-height: 600px) {
+	.monaco-workbench .titlebar {
+		height: 40px !important;
+		min-height: 40px !important;
+	}
+	
+	.monaco-workbench .part.sidebar {
+		width: 18vw !important;
+		min-width: 160px !important;
+		max-width: 240px !important;
+	}
+	
+	.monaco-workbench .editor-container {
+		height: calc(100vh - 40px) !important;
+	}
+}
+
+/* الوضع العمودي / Portrait mode */
+@media (orientation: portrait) and (max-width: 768px) {
+	.monaco-workbench .part.sidebar {
+		width: 100vw !important;
+		height: 100vh !important;
+		position: fixed !important;
+		top: 0 !important;
+		left: 0 !important;
+		z-index: 1000 !important;
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+	}
+	
+	.monaco-workbench .part.sidebar.visible {
+		transform: translateX(0);
+	}
+}
+
+/* =========================== تحسينات الأيقونات / Icon Optimizations =========================== */
+
+/* أحجام الأيقونات المتجاوبة / Responsive icon sizes */
+@media (max-width: 480px) {
+	.monaco-workbench .codicon[class*='codicon-'] {
+		font-size: 16px !important;
+		width: 16px !important;
+		height: 16px !important;
+	}
+	
+	.monaco-workbench .title .codicon[class*='codicon-'],
+	.monaco-workbench .action-bar .codicon[class*='codicon-'] {
+		font-size: 18px !important;
+		width: 18px !important;
+		height: 18px !important;
+	}
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+	.monaco-workbench .codicon[class*='codicon-'] {
+		font-size: 18px !important;
+		width: 18px !important;
+		height: 18px !important;
+	}
+	
+	.monaco-workbench .title .codicon[class*='codicon-'],
+	.monaco-workbench .action-bar .codicon[class*='codicon-'] {
+		font-size: 20px !important;
+		width: 20px !important;
+		height: 20px !important;
+	}
+}
+
+@media (min-width: 769px) {
+	.monaco-workbench .codicon[class*='codicon-'] {
+		font-size: 16px !important;
+		width: 16px !important;
+		height: 16px !important;
+	}
+	
+	.monaco-workbench .title .codicon[class*='codicon-'],
+	.monaco-workbench .action-bar .codicon[class*='codicon-'] {
+		font-size: 18px !important;
+		width: 18px !important;
+		height: 18px !important;
+	}
+}
+
+/* =========================== تحسينات التمرير / Scroll Optimizations =========================== */
+
+/* تحسين شريط التمرير / Scrollbar optimization */
+.monaco-workbench ::-webkit-scrollbar {
+	width: 8px !important;
+	height: 8px !important;
+}
+
+.monaco-workbench ::-webkit-scrollbar-track {
+	background: transparent !important;
+}
+
+.monaco-workbench ::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.2) !important;
+	border-radius: 4px !important;
+}
+
+.monaco-workbench ::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* تحسين التمرير للمس / Touch scroll optimization */
+.monaco-workbench .monaco-scrollable-element {
+	-webkit-overflow-scrolling: touch !important;
+	scroll-behavior: smooth !important;
+}
+
+/* =========================== تحسينات الأداء / Performance Optimizations =========================== */
+
+/* تحسين الرسوم المتحركة / Animation optimization */
+@media (prefers-reduced-motion: reduce) {
+	.monaco-workbench *,
+	.monaco-workbench *::before,
+	.monaco-workbench *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* تحسين العرض للشاشات عالية الدقة / High DPI display optimization */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+	.monaco-workbench {
+		font-smooth: antialiased;
+		-webkit-font-smoothing: antialiased;
+	}
+}
+
+/* =========================== تحسينات إمكانية الوصول / Accessibility Optimizations =========================== */
+
+/* تحسين التركيز / Focus optimization */
+.monaco-workbench [tabindex="0"]:focus,
+.monaco-workbench .synthetic-focus input:focus,
+.monaco-workbench select:focus,
+.monaco-workbench textarea:focus {
+	outline: 2px solid var(--vscode-focusBorder) !important;
+	outline-offset: 2px !important;
+	border-radius: 4px !important;
+}
+
+/* تحسين التباين / Contrast optimization */
+.monaco-workbench.hc-black,
+.monaco-workbench.hc-light {
+	--vscode-focusBorder: #007acc !important;
+	--vscode-focusBorder-transparent: rgba(0, 122, 204, 0.4) !important;
+}
+
+/* =========================== تحسينات Cloudflare Pages / Cloudflare Pages Optimizations =========================== */
+
+/* تحسين التحميل / Loading optimization */
+.monaco-workbench.web {
+	/* تحسين الأداء للويب / Web performance optimization */
+	contain: layout style paint;
+	will-change: transform;
+	
+	/* تحسين الذاكرة / Memory optimization */
+	transform: translateZ(0);
+	backface-visibility: hidden;
+}
+
+/* تحسين التخزين المؤقت / Cache optimization */
+.monaco-workbench img,
+.monaco-workbench svg {
+	max-width: 100%;
+	height: auto;
+	object-fit: contain;
+}
+
+/* تحسين الخطوط / Font optimization */
+.monaco-workbench {
+	font-display: swap;
+}
+
+/* =========================== تحسينات خاصة بالشاشات الكبيرة جداً / Extra Large Screen Optimizations =========================== */
+
+@media (min-width: 1440px) {
+	.monaco-workbench {
+		transform: scale(0.95);
+		transform-origin: top left;
+		width: 105.263%; /* 100% / 0.95 */
+		height: 105.263%;
+	}
+	
+	.monaco-workbench .part.sidebar {
+		width: 18vw !important;
+		min-width: 250px !important;
+		max-width: 350px !important;
+	}
+}
+
+@media (min-width: 1920px) {
+	.monaco-workbench {
+		transform: scale(1);
+		transform-origin: top left;
+		width: 100%;
+		height: 100%;
+	}
+	
+	.monaco-workbench .part.sidebar {
+		width: 16vw !important;
+		min-width: 280px !important;
+		max-width: 400px !important;
+	}
+}
+
+/* =========================== تحسينات خاصة بالشاشات الصغيرة جداً / Extra Small Screen Optimizations =========================== */
+
+@media (max-width: 320px) {
+	.monaco-workbench {
+		font-size: 11px !important;
+		transform: scale(0.6);
+		transform-origin: top left;
+		width: 166.667%; /* 100% / 0.6 */
+		height: 166.667%;
+	}
+	
+	.monaco-workbench .monaco-button,
+	.monaco-workbench .action-label,
+	.monaco-workbench button {
+		min-width: 48px !important;
+		min-height: 48px !important;
+		padding: 10px 14px !important;
+		font-size: 15px !important;
+		border-radius: 10px !important;
+		margin: 5px !important;
+	}
+	
+	.monaco-workbench .codicon[class*='codicon-'] {
+		font-size: 18px !important;
+		width: 18px !important;
+		height: 18px !important;
+	}
+}
+
+/* =========================== تحسينات خاصة بالشاشات المتعددة / Multi-Screen Optimizations =========================== */
+
+@media (min-width: 2560px) {
+	.monaco-workbench {
+		transform: scale(1.1);
+		transform-origin: top left;
+		width: 90.909%; /* 100% / 1.1 */
+		height: 90.909%;
+	}
+	
+	.monaco-workbench .part.sidebar {
+		width: 14vw !important;
+		min-width: 320px !important;
+		max-width: 450px !important;
+	}
+}
+
+/* =========================== تحسينات خاصة بالطابعات / Print Optimizations =========================== */
+
+@media print {
+	.monaco-workbench {
+		transform: none !important;
+		width: 100% !important;
+		height: 100% !important;
+	}
+	
+	.monaco-workbench .part.sidebar {
+		display: none !important;
+	}
+	
+	.monaco-workbench .editor-container {
+		width: 100% !important;
+		height: 100% !important;
+	}
+}

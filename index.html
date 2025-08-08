@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%; height: 100%;">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	<meta name="theme-color" content="#007acc">
+	<meta name="description" content="VS Code Web - Optimized for Cloudflare Pages with responsive design for all devices">
+	<meta name="keywords" content="VS Code, Web Editor, Cloudflare Pages, Responsive Design">
+	<meta name="author" content="VS Code Team">
+	
+	<!-- Cloudflare Pages Optimizations -->
+	<meta http-equiv="X-Content-Type-Options" content="nosniff">
+	<meta http-equiv="X-Frame-Options" content="DENY">
+	<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+	
+	<!-- PWA Support -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="VS Code Web">
+	
+	<!-- Preload critical resources -->
+	<link rel="preload" href="./out-build/vs/loader.js" as="script">
+	<link rel="preload" href="./out-build/vs/workbench/workbench.web.main.js" as="script">
+	
+	<!-- Favicon -->
+	<link rel="icon" type="image/svg+xml" href="./out-build/vs/workbench/browser/media/code-icon.svg">
+	<link rel="apple-touch-icon" href="./out-build/vs/workbench/browser/media/code-icon.svg">
+	
+	<!-- PWA Manifest -->
+	<link rel="manifest" href="./manifest.json">
+	
+	<title>VS Code Web - Cloudflare Pages</title>
+	
+	<style>
+		/* Critical CSS for initial load */
+		html, body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+		}
+		
+		/* Loading screen */
+		#loading {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #1e1e1e;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			color: #cccccc;
+			z-index: 9999;
+			transition: opacity 0.3s ease;
+		}
+		
+		#loading.hidden {
+			opacity: 0;
+			pointer-events: none;
+		}
+		
+		.loading-spinner {
+			width: 40px;
+			height: 40px;
+			border: 3px solid #333333;
+			border-top: 3px solid #007acc;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin-bottom: 20px;
+		}
+		
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+		
+		.loading-text {
+			font-size: 16px;
+			margin-bottom: 10px;
+		}
+		
+		.loading-subtext {
+			font-size: 14px;
+			color: #888888;
+		}
+		
+		/* Responsive loading screen */
+		@media (max-width: 480px) {
+			.loading-spinner {
+				width: 30px;
+				height: 30px;
+				border-width: 2px;
+			}
+			
+			.loading-text {
+				font-size: 14px;
+			}
+			
+			.loading-subtext {
+				font-size: 12px;
+			}
+		}
+		
+		/* Cloudflare Pages specific optimizations */
+		.monaco-workbench {
+			contain: layout style paint;
+			will-change: transform;
+		}
+		
+		/* Performance optimizations */
+		* {
+			box-sizing: border-box;
+		}
+		
+		/* Touch optimizations */
+		@media (hover: none) and (pointer: coarse) {
+			.monaco-workbench {
+				touch-action: manipulation;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<!-- Loading Screen -->
+	<div id="loading">
+		<div class="loading-spinner"></div>
+		<div class="loading-text">جاري تحميل VS Code Web...</div>
+		<div class="loading-subtext">Loading VS Code Web...</div>
+	</div>
+
+	<!-- Main Application Container -->
+	<div id="vscode-workbench" style="width: 100%; height: 100%;"></div>
+
+	<script>
+		// Cloudflare Pages specific optimizations
+		(function() {
+			'use strict';
+			
+			// Performance monitoring
+			const startTime = performance.now();
+			
+			// Check for service worker support
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', function() {
+					navigator.serviceWorker.register('./service-worker.js')
+						.then(function(registration) {
+							console.log('ServiceWorker registration successful');
+						})
+						.catch(function(err) {
+							console.log('ServiceWorker registration failed');
+						});
+				});
+			}
+			
+			// Responsive viewport handling
+			function updateViewport() {
+				const viewport = document.querySelector('meta[name=viewport]');
+				const isMobile = window.innerWidth <= 768;
+				
+				if (isMobile) {
+					viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+				} else {
+					viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+				}
+			}
+			
+			// Update viewport on resize
+			window.addEventListener('resize', updateViewport);
+			updateViewport();
+			
+			// Loading progress
+			let loadingProgress = 0;
+			const loadingInterval = setInterval(function() {
+				loadingProgress += Math.random() * 15;
+				if (loadingProgress >= 90) {
+					clearInterval(loadingInterval);
+				}
+			}, 100);
+			
+			// Hide loading screen when app is ready
+			function hideLoading() {
+				const loading = document.getElementById('loading');
+				loading.classList.add('hidden');
+				setTimeout(function() {
+					loading.style.display = 'none';
+				}, 300);
+			}
+			
+			// Error handling
+			window.addEventListener('error', function(e) {
+				console.error('Application error:', e.error);
+				hideLoading();
+			});
+			
+			// Performance logging
+			window.addEventListener('load', function() {
+				const loadTime = performance.now() - startTime;
+				console.log(`VS Code Web loaded in ${loadTime.toFixed(2)}ms`);
+			});
+			
+			// Expose hideLoading for VS Code to call
+			window.hideVSLoading = hideLoading;
+		})();
+	</script>
+
+	<!-- VS Code Loader -->
+	<script src="./out-build/vs/loader.js"></script>
+	<script>
+		// VS Code Web Configuration
+		var require = {
+			paths: {
+				'vs': './out-build/vs'
+			}
+		};
+		
+		// Load VS Code Web
+		require(['vs/workbench/workbench.web.main'], function() {
+			// VS Code is loaded, hide loading screen
+			if (window.hideVSLoading) {
+				window.hideVSLoading();
+			}
+		});
+	</script>
+</body>
+
+</html>
