@@ -95,55 +95,20 @@ if [ -f "index.html" ]; then
     print_success "Index HTML copied"
 fi
 
-# Create _headers file for Cloudflare Pages
-print_status "Creating Cloudflare Pages headers..."
-cat > out-build/_headers << EOF
-/*
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+# Copy Cloudflare Pages configuration files
+print_status "Copying Cloudflare Pages configuration files..."
 
-/*.js
-  Cache-Control: public, max-age=31536000, immutable
+# Copy _headers file
+if [ -f "_headers" ]; then
+    cp _headers out-build/
+    print_success "_headers file copied"
+fi
 
-/*.css
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.svg
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.png
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.jpg
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.woff
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.woff2
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.ttf
-  Cache-Control: public, max-age=31536000, immutable
-
-service-worker.js
-  Cache-Control: no-cache
-
-manifest.json
-  Cache-Control: public, max-age=3600
-EOF
-
-print_success "Headers file created"
-
-# Create _redirects file for Cloudflare Pages
-print_status "Creating Cloudflare Pages redirects..."
-cat > out-build/_redirects << EOF
-/*    /index.html   200
-EOF
-
-print_success "Redirects file created"
+# Copy _redirects file
+if [ -f "_redirects" ]; then
+    cp _redirects out-build/
+    print_success "_redirects file copied"
+fi
 
 # Create robots.txt
 print_status "Creating robots.txt..."
